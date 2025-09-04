@@ -1,0 +1,148 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Delicious+Handrawn&display=swap");
+@import "tailwindcss";
+
+@theme {
+
+	/* Breakpoints */
+	/* --breakpoint-xs: px; */
+	--breakpoint-xs: 480px;
+	--breakpoint-sm: 640px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 992px;
+	--breakpoint-xl: 1140px;
+	--breakpoint-xxl: 1320px;
+	
+	/* Fonts */
+	--font-Playfair: "Playfair Display", serif;
+	--font-Plus-Jakarta-Sans: "Plus Jakarta Sans", sans-serif;
+	--font-Delicious-Handrawn: "Delicious Handrawn", cursive;
+
+	/* Colors */
+	--primary-color: #51c206;
+	--secondary-color: #384054;
+	--primary-text: #fcfeff;
+	--secondary-text: #b9bbbd;
+	--black-color: #252422;
+	--black-color-2: #181b1b;
+	--tertiary-color: #c8c5c3;
+	--grey-color: #909090;
+
+	/* Background-Colors */
+	--bg-color: #292c33;
+
+	/* Shadow */
+	--header-shadow: 0 2px 20px rgba(252, 254, 255, 0.1);
+
+}
+
+.mainBtn {
+	@apply w-38 xs:w-48 sm:w-52 lg:w-48 xl:w-54 py-1.5 xs:py-2 sm:py-3 border-2 rounded-2xl sm:rounded-3xl font-Playfair text-lg xs:text-xl capitalize font-semibold bg-(--primary-color) text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-transparent hover:text-(--primary-color);
+}
+
+.secondBtn {
+	@apply w-38 xs:w-48 sm:w-52 lg:w-48 xl:w-54 py-1.5 xs:py-2 sm:py-3 border-2 rounded-2xl sm:rounded-3xl font-Playfair text-lg xs:text-xl capitalize font-semibold text-(--primary-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-(--primary-color) hover:text-(--black-color);
+}
+
+.cancelBtn {
+	@apply w-38 xs:w-48 sm:w-52 lg:w-48 xl:w-54 py-1.5 xs:py-2 sm:py-3 border-2 rounded-xl sm:rounded-3xl font-Playfair text-lg xs:text-xl capitalize font-semibold text-[#CC4444] border-[#CC4444] cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-[#CC4444] hover:text-(--primary-text);
+}
+
+.carousel-card {
+	@apply h-full rounded-3xl bg-(--secondary-color) overflow-hidden;
+	width: calc((100% - 48px) / 3);
+	min-width: calc((100% - 48px) / 3);
+}
+
+@media (max-width: 992px) {
+	.carousel-card {
+		min-width: calc((100% - 48px) / 2);
+	}
+}
+
+@media (max-width: 640px) {
+	.carousel-card {
+		min-width: calc((100% ) / 1);
+	}
+}
+
+body {
+	background-color: var(--bg-color);
+}
+
+.scrollbar-none {
+	scrollbar-width: none;
+}
+
+.circle {
+	animation: circle74 0.5s alternate infinite ease;
+}
+
+@keyframes circle74 {
+	0% {
+		transform: translateY(0) scale(1.2);
+	}
+	100% {
+		transform: translateY(-50px) scale(1);
+		opacity: 1;
+	}
+}
+
+.shadow {
+	animation: shadow74 0.5s alternate infinite ease;
+}
+
+@keyframes shadow74 {
+	0% {
+		transform: scale(1.2);
+		opacity: 0.5;
+	}
+	100% {
+		transform: scale(0);
+		opacity: 1;
+	}
+}
+
+.circle:nth-child(2),
+.shadow:nth-child(2) {
+	animation-delay: 0.2s;
+}
+
+.circle:nth-child(3),
+.shadow:nth-child(3) {
+	animation-delay: 0.4s;
+}
+
+.dropdown {
+	animation: streamline 0.3s ease backwards;
+}
+
+.modal {
+	animation: streamline 0.8s ease backwards;
+}
+
+@keyframes streamline {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Xlarge screens */
+@media (max-width: 640px) {
+	.container {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+}
+
+@media (min-width: 1400px) {
+	.container {
+		width: 1320px;
+	}
+}
