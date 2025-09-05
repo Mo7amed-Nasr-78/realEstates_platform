@@ -82,9 +82,9 @@ export const signin = asyncHandler(async (req, res) => {
 	);
 
 	res.cookie("accessToken", accessToken, {
-		secure: false,
+		secure: true,
 		httpOnly: true,
-		sameSite: "strict",
+		sameSite: "none",
 		// maxAge: 60000,
 	});
 
