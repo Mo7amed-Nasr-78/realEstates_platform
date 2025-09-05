@@ -181,8 +181,6 @@ export const uploadProperty = asyncHandler(
 			}
 		}
 
-		console.log(category);
-
 		area = parseInt(area);
 		rooms = parseInt(rooms);
 		garages = parseInt(garages);
@@ -217,7 +215,6 @@ export const uploadProperty = asyncHandler(
 			imagePaths.push(result.secure_url);
 		}
 
-
 		const property = new Property({
 			name,
 			address,
@@ -239,12 +236,12 @@ export const uploadProperty = asyncHandler(
 		});
 		await property.save();
 
-		await createNotification({
-			event: 'notification',
-			senderId: userId,
-			receiverId: booking.user.toString(),
-			content: `your ${property.name} property uploaded and wait for confirm`
-		});
+		// await createNotification({
+		// 	event: 'notification',
+		// 	senderId: userId,
+		// 	receiverId: booking.user.toString(),
+		// 	content: `your ${property.name} property uploaded and wait for confirm`
+		// });
 
 		user.properties.push(property._id);
 		await user.save();

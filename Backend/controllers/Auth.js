@@ -104,9 +104,6 @@ export const facebookAuth = asyncHandler(
 	async (req, res) => {
 		const { facebookId, accessToken } = req.body;
 
-		console.log(facebookId)
-		console.log(accessToken);
-
 		const response = await fetch(`https://graph.facebook.com/me?access_token=${accessToken}`);
 		const fbUser = await response.json();
 

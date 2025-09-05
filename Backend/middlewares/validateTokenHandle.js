@@ -1,22 +1,6 @@
 import jwt from 'jsonwebtoken';
 
 const validateToken = async (req, res, next) => {
-    // const token;
-    // const authHeader = req.headers.authorization || req.headers.Authorization;
-
-    // if (authHeader && authHeader.startsWith("Bearer")) {
-    //     token = authHeader.split(" ")[1];
-    //     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    //         if (err) {
-    //             res.status(401);
-    //             throw new Error("User is not authorized");
-    //         }
-    //         // console.log(decoded);
-    //         req.user = decoded.user;
-    //         next();
-    //     });
-    // }
-
     const token = req.cookies['accessToken'];
 
     if(!token) {

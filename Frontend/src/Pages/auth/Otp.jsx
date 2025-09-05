@@ -97,12 +97,12 @@ function Otp() {
                                     onKeyDown={(e) => handleKeyDown(e, index)}
                                     ref={(el) => (inputsRef.current[index] = el)}
                                     autoComplete="false"
-                                    className="h-18 xl:h-22 w-[20%] rounded-3xl p-0 bg-[#676e80bd]/25 text-3xl text-center text-(--primary-text) placeholder:text-(--tertiary-color) focus:outline-2 focus:outline-(--primary-color) font-normal"
+                                    className="h-16 sm:h-18 xl:h-22 w-[20%] rounded-2xl sm:rounded-3xl p-0 bg-[#676e80bd]/25 text-3xl text-center text-(--primary-text) placeholder:text-(--tertiary-color) focus:outline-2 focus:outline-(--primary-color) font-normal"
                                 />
                             ))
                         }
                     </div>
-                    <button type="submit" className="w-full px-10 py-3 rounded-[20px] bg-(--primary-color) text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">verify</button>
+                    <button type="submit" className="w-full py-2.5 sm:py-3 rounded-[20px] bg-(--primary-color) text-lg sm:text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">verify</button>
                 </form>
                 <div className="w-full flex items-center justify-center">
                     <h3 className="font-Plus-Jakarta-Sans text-base font-light text-(--primary-text) capitalize">

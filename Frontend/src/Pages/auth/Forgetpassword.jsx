@@ -61,13 +61,13 @@ function Forgetpassword() {
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans text-base md:text-lg font-light text-(--secondary-text) text-center mb-6 capitalize">No worries! Reset it quickly and securely to regain access to your account.</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">
                     <label htmlFor="email" className="font-Plus-Jakarta-Sans text-lg sm:text-xl font-normal text-(--primary-text) capitalize mb-2">email:</label>
-                    <input type="email" name="email" id="email" placeholder="Enter Your Email" className="h-14 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
-                    <button type="submit" className="w-full px-10 py-3 rounded-[20px] bg-(--primary-color) text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">continue</button>
+                    <input type="email" name="email" id="email" placeholder="Enter Your Email" className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:text-(--tertiary-color) placeholder:font-light mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
+                    <button type="submit" className="w-full py-2.5 sm:py-3 rounded-[20px] bg-(--primary-color) text-lg sm:text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">continue</button>
                 </form>
                 <div className="w-full flex items-center justify-center">
                     <h3 className="font-Plus-Jakarta-Sans text-base font-light text-(--primary-text) capitalize">
                         for any question?
-                        <Link to={'/helpcenter'}>
+                        <Link to={'/'}>
                             <span className="text-(--primary-color) underline capitalize font-medium ms-1">help center</span>
                         </Link>
                     </h3>

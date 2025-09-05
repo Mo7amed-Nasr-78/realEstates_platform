@@ -13,8 +13,6 @@ function Signup() {
     const { url, user } = useProps();
     const [ isLoading, setIsLoading ] = useState(false);
 
-    console.log(searchParams.get('role'));
-
     useEffect(() => {
 		if (user) {
 			navigate("/");
@@ -86,15 +84,15 @@ function Signup() {
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans md:text-lg font-light text-(--secondary-text) mb-6 capitalize">Join us! sign up for exclusive real estate updates, listings, and expert insights</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">
                     <label htmlFor="name" className="font-Plus-Jakarta-Sans text-lg lg:text-xl font-normal text-(--primary-text) capitalize mb-2">name:</label>
-                    <input type="text" name="name" id="name" placeholder="Enter Your Name" className="h-13 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
+                    <input type="text" name="name" id="name" placeholder="Enter Your Name" className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
                     <label htmlFor="email" className="font-Plus-Jakarta-Sans text-lg lg:text-xl font-normal text-(--primary-text) capitalize mb-2">email:</label>
-                    <input type="email" name="email" id="email" placeholder="Enter Your Email" className="h-13 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
+                    <input type="email" name="email" id="email" placeholder="Enter Your Email" className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
                     <label htmlFor="password" className="font-Plus-Jakarta-Sans text-lg lg:text-xl font-normal text-(--primary-text) capitalize mb-2">Password:</label>
-                    <input type="password" name="password" id="password" placeholder="Enter Your Password" className="h-13 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-6 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
-                    <button type="submit" className="w-full px-10 py-3 rounded-[20px] bg-(--primary-color) text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">sign up</button>
+                    <input type="password" name="password" id="password" placeholder="Enter Your Password" className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-6 focus:outline-2 focus:outline-(--primary-color)" autoComplete="false"/>
+                    <button type="submit" className="w-full px-10 py-2.5 sm:py-3 rounded-[20px] bg-(--primary-color) text-lg sm:text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95">sign up</button>
                 </form>
                 <div className="w-full flex items-center justify-center">
-                    <h3 className="font-Plus-Jakarta-Sans text-base font-light text-(--primary-text) capitalize">
+                    <h3 className="font-Plus-Jakarta-Sans text-sm sm:text-base font-light text-(--primary-text) capitalize">
                         Already have an account?
                         <Link to={'/signin'}>
                             <span className="text-(--primary-color) underline capitalize font-medium ms-1">sign in</span>

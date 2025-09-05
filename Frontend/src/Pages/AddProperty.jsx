@@ -5,7 +5,6 @@ import axios from 'axios';
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer";
 import Alert from "../components/Alert";
-import Loader from "../components/Loader";
 import Dropdown from "../components/Dropdown";
 import {facilities } from "../../Data/Data";
 import { 
@@ -199,18 +198,16 @@ function AddProperty() {
             const res = (await axios.post(`${url}/api/property/upload`, formData, { withCredentials: true })).data;
             Alert('success', res.message);
         } catch (err) {
-            console.log(err);
             Alert('error', err.response?.data?.message);
         } finally {
             setIsLoading(false);
+            setInfo(infoObject);
+            setSeleted(null);
+            setImgs(imgsObject);
+            setFeatures([{ title: '', description: '' }]);
+            setInsights([{ title: '', description: '' }]);
+            setFinancials([{ title: '', description: '' }]);
         }
-
-        setInfo(infoObject);
-        setSeleted(null);
-        setImgs(imgsObject);
-        setFeatures([{ title: '', description: '' }]);
-        setInsights([{ title: '', description: '' }]);
-        setFinancials([{ title: '', description: '' }]);
     }
 
 
@@ -246,7 +243,7 @@ function AddProperty() {
                                     {
                                         Object.keys(imgs).map((inputName, idx) => {
                                             return (
-                                                <div key={inputName} className={idx === 0? 'col-span-3 h-48 sm:h-82 lg:h-70': 'col-span-1 h-24 sm:h-42 lg:h-28'}>
+                                                <div key={inputName} className={idx === 0? 'col-span-3 h-48 sm:h-82 lg:h-56 xl:h-70': 'col-span-1 h-24 sm:h-42 lg:h-18 xl:h-28'}>
                                                     <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer duration-300 ease-in-out text-3xl text-(--primary-text) outline-2 outline-dashed outline-(--secondary-text) hover:outline-(--primary-color) hover:text-(--primary-color)">
                                                         <label htmlFor={inputName} className="w-full h-full flex items-center justify-center bg-[rgb(118,118,118,0.15)] cursor-pointer">
                                                             <PiPlus />
@@ -446,7 +443,7 @@ function AddProperty() {
                                 
                             </div>
                             <div className="w-full flex justify-end">
-                                <button type="submit" className={`${isLoading? '!bg-(--primary-color)/50 h-13': ''} mainBtn`}>
+                                <button type="submit" disabled={isLoading} className={`${isLoading? '!bg-(--primary-color)/50 h-13': ''} mainBtn`}>
                                     <div className="w-full h-full flex items-center justify-center gap-3">
                                         <div className={`${isLoading? 'block': 'hidden'} relative h-4 w-4 animate-spin`}>
                                             <div className="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-(--primary-text) border-t-transparent"></div>

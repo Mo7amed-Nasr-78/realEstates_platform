@@ -112,7 +112,7 @@ function Signin() {
 						name="email"
 						id="email"
 						placeholder="Enter Your Email"
-						className="h-13 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)"
+						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)"
 						autoComplete="false"
 					/>
 					<label
@@ -126,18 +126,18 @@ function Signin() {
 						name="password"
 						id="password"
 						placeholder="Enter Your Password"
-						className="h-13 w-full rounded-[20px] px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color)  mb-6 focus:outline-2 focus:outline-(--primary-color)"
+						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color)  mb-6 focus:outline-2 focus:outline-(--primary-color)"
 						autoComplete="false"
 					/>
 					<button
 						type="submit"
-						className="w-full px-10 py-3 rounded-[20px] bg-(--primary-color) text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95"
+						className="w-full px-10 py-2.5 sm:py-3 rounded-[20px] bg-(--primary-color) text-lg sm:text-xl font-Playfair font-bold capitalize text-(--black-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95"
 					>
 						sign in
 					</button>
 				</form>
 				<div className="w-full flex items-center justify-between">
-					<h3 className="font-Plus-Jakarta-Sans text-base font-light text-(--primary-text) capitalize">
+					<h3 className="font-Plus-Jakarta-Sans text-sm sm:text-base font-light text-(--primary-text) capitalize">
 						create an account?
 						<Link to={"/role"}>
 							<span className="text-(--primary-color) underline capitalize font-medium ms-1">
@@ -146,7 +146,7 @@ function Signin() {
 						</Link>
 					</h3>
 					<Link to={"/forgetpassword"}>
-						<span className="font-Plus-Jakarta-Sans text-base text-(--primary-color) underline capitalize font-medium ms-1">
+						<span className="font-Plus-Jakarta-Sans text-sm sm:text-base text-(--primary-color) underline capitalize font-medium ms-1">
 							forget password
 						</span>
 					</Link>
@@ -158,19 +158,19 @@ function Signin() {
 					</h4>
 					<span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
 				</div>
-				<div className="w-full flex items-center justify-between gap-10">
+				<div className="w-full flex items-center justify-between gap-4 sm:gap-10">
 					<Link onClick={googleAuth} className="w-[50%]">
-						<button className="w-full h-14 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
+						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
-							<h4 className="text-lg font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
+							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
 								google
 							</h4>
 						</button>
 					</Link>
 					<Link to={""} className="w-[50%]">
-						<button className="w-full h-14 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
+						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/facebook.svg" alt="icon" />
-							<h4 className="text-lg font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
+							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
 								facebook
 							</h4>
 						</button>

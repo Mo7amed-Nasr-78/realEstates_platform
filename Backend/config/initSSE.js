@@ -1,3 +1,5 @@
+import env from 'dotenv';
+env.config();
 let clients = new Map();
 
 export const initSse = async (req, res) => {
@@ -6,13 +8,13 @@ export const initSse = async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+    res.setHeader("Access-Control-Allow-Origin", process.env.FRONT_END_URL);
 
     clients.set(userId, res);
-    console.log("client connected");
+    // console.log("client connected");
 
     req.on('close', () => {
-        console.log('client disconnected');
+        // console.log('client disconnected');
         clients.delete(userId);
         res.end();
     });
