@@ -20,7 +20,7 @@ import { initSse } from "./config/initSSE.js";
 import validateToken from "./middlewares/validateTokenHandle.js";
 
 dotenv.config();
-const port = 3030;
+const port = process.env.PORT | 3030;
 const app = express();
 const server = http.createServer(app);
 
