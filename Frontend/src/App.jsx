@@ -49,7 +49,7 @@ function App() {
 	useEffect(() => {
 		if (!user) return;
 
-		const socket = io("http://localhost:3030/", {
+		const socket = io(url, {
 			withCredentials: true,
 			reconnection: true,
 			reconnectionDelay: 1000,
