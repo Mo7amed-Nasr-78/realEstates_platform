@@ -127,7 +127,7 @@ function Chat({ status, newMsg }) {
                                 <img src={otherUser?.picture} alt="image" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-(--primary-color)" />
                                 <div className="flex flex-col">
                                     <h3 className="font-Plus-Jakarta-Sans font-medium text-xl text-(--primary-text) capitalize line-clamp-1">{ otherUser?.name }</h3>
-                                    <h5 className="font-Plus-Jakarta-Sans font-light text-sm text-(--secondary-text) capitalize">
+                                    <h5 className="font-Plus-Jakarta-Sans font-light text-sm text-(--secondary-text) capitalize line-clamp-1">
                                         { 
                                             otherUser?.isActive? 
                                                 'active now'

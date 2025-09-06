@@ -59,9 +59,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		});
 		if (existingUser.googleId === decoded.sub) {
 			res.cookie("accessToken", accessToken, {
-				secure: false,
+				secure: true,
 				httpOnly: true,
 				sameSite: "strict",
+				maxAge: 24 * 60 * 60 * 1000
 			});
 			
 			res.redirect(url);
@@ -70,9 +71,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		existingUser.googleId = decoded.sub;
 		await existingUser.save();
 		res.cookie("accessToken", accessToken, {
-			secure: false,
+			secure: true,
 			httpOnly: true,
-			sameSite: "strict",
+			sameSite: "none",
+			maxAge: 24 * 60 * 60 * 1000
 		});
 			
 		res.redirect(url);
@@ -92,9 +94,9 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		email: newUser._doc.email,
 	});
 	res.cookie("accessToken", accessToken, {
-		secure: false,
+		secure: true,
 		httpOnly: true,
-		sameSite: "strict",
+		sameSite: "none",
 	});
 
 	res.redirect(url);
@@ -131,9 +133,9 @@ export const facebookAuth = asyncHandler(
 			email: user.email,
 		});
 		res.cookie("accessToken", token, {
-			secure: false,
+			secure: true,
 			httpOnly: true,
-			sameSite: "strict",
+			sameSite: "none",
 		});
 
 		res.redirect(url)

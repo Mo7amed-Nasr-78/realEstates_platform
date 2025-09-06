@@ -243,8 +243,8 @@ function AddProperty() {
                                     {
                                         Object.keys(imgs).map((inputName, idx) => {
                                             return (
-                                                <div key={inputName} className={idx === 0? 'col-span-3 h-48 sm:h-82 lg:h-56 xl:h-70': 'col-span-1 h-24 sm:h-42 lg:h-18 xl:h-28'}>
-                                                    <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer duration-300 ease-in-out text-3xl text-(--primary-text) outline-2 outline-dashed outline-(--secondary-text) hover:outline-(--primary-color) hover:text-(--primary-color)">
+                                                <div key={inputName} className={idx === 0? 'col-span-3 h-48 sm:h-82 lg:h-52 xl:h-60 xxl:h-70': 'col-span-1 h-24 sm:h-42 lg:h-18 xl:h-22 xxl:h-28'}>
+                                                    <div className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer duration-300 ease-in-out text-2xl xxl:text-3xl text-(--primary-text) outline-2 outline-dashed outline-(--secondary-text) hover:outline-(--primary-color) hover:text-(--primary-color)">
                                                         <label htmlFor={inputName} className="w-full h-full flex items-center justify-center bg-[rgb(118,118,118,0.15)] cursor-pointer">
                                                             <PiPlus />
                                                         </label>
