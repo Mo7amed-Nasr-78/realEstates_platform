@@ -11,7 +11,6 @@ import {
 	PiInstagramLogoLight,
 	PiXLogoLight,
 	PiInfoLight,
-	PiBandaidsLight
 } from 'react-icons/pi';
 
 
@@ -49,7 +48,6 @@ function ProfileDetails() {
 					withCredentials: true
 				}
 			)).data;
-			console.log(res);
 			navigate(`/messages/${res.chat._id}`)
 		} catch (err) {
 			console.log(err);
@@ -64,8 +62,8 @@ function ProfileDetails() {
 			<section className="w-full bg-(--bg-color) mt-36 mb-25">
 				<div className="grid grid-cols-12 container mx-auto gap-6">
 
-					<div className="col-span-4">
-						<div className="w-full flex flex-col items-center rounded-3xl border-2 border-(--secondary-text) p-6">
+					<div className="col-span-12 lg:col-span-4">
+						<div className="w-full flex flex-col items-center rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
 							<div className="relative flex flex-col items-center mb-4">
 								<img
 									src={user.picture}
@@ -143,8 +141,8 @@ function ProfileDetails() {
 						</div>
 					</div>
 
-					<div className='col-span-8'>
-						<div className="w-full rounded-3xl border-2 border-(--secondary-text) p-6">
+					<div className='col-span-12 lg:col-span-8'>
+						<div className="w-full rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
 							<nav className="w-full border-b border-(--secondary-text) mb-5">
 								<ul className="flex items-center">
 									<li onClick={() => setProfileTab('overview')} className={`${profileTab.includes('overview')? 'text-(--primary-color) before:absolute before:top-full before:left-0 before:w-full before:border-b before:border-(--primary-color)': 'text-(--primary-text)'} relative pb-3 px-3 font-Plus-Jakarta-Sans font-normal text-xl capitalize cursor-pointer hover:text-(--primary-color)`}>

@@ -127,8 +127,8 @@ function Listings() {
                             <h2 className="font-Playfair font-medium text-4xl text-(--primary-text) capitalize">our all residences</h2>
                             <h4 className="font-Plus-Jakarta-Sans font-light text-base sm:text-lg text-(--secondary-text) capitalize">{ properties.length } results of residences</h4>
                         </div>
-                        <button onClick={() => { showFilter? setShowFilter(false): setShowFilter(true) }} className="w-fit flex items-center gap-1 text-(--secondary-text) px-5 py-3 border border-(--secondary-text) duration-300 ease-in-out hover:text-(--primary-color) hover:border-(--primary-color) hover:scale-95 cursor-pointer rounded-[20px]">
-                            <PiFunnel className="text-2xl"/>
+                        <button onClick={() => { showFilter? setShowFilter(false): setShowFilter(true) }} className="w-fit flex items-center gap-1 text-(--secondary-text) px-5 py-2.5 sm:py-3 border border-(--secondary-text) duration-300 ease-in-out hover:text-(--primary-color) hover:border-(--primary-color) hover:scale-95 cursor-pointer rounded-[20px]">
+                            <PiFunnel className="text-xl sm:text-2xl"/>
                             <span className="font-Playfair font-normal text-lg capitalize">filter</span>
                         </button>
                     </div>

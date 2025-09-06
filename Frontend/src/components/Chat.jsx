@@ -37,7 +37,6 @@ function Chat({ status, newMsg }) {
                         withCredentials: true,
                     }
                 )).data;
-                console.log(res);
                 setOtherUser(res.otherUser);
                 setMsgs(res.messages);
             } catch (err) {
@@ -119,13 +118,13 @@ function Chat({ status, newMsg }) {
 
 
     return (
-        <div className={'col-span-12 lg:col-span-8 h-[90vh] lg:h-[80vh] flex flex-col justify-between gap-6 rounded-3xl border-1 border-(--secondary-text) p-4 sm:p-6'}>
+        <div className={'col-span-12 lg:col-span-8 h-[90vh] lg:h-[80vh] flex flex-col justify-between gap-6 rounded-3xl border border-(--secondary-text) p-4 sm:p-6'}>
             {
                 id?
                     <div className="h-full flex flex-col gap-2">
                         <div className="w-full flex items-center justify-between p-3 rounded-3xl bg-(--secondary-color)">
                             <div className="flex items-center justify-between gap-3">
-                                <img src={otherUser?.picture} alt="image" className="w-16 h-16 rounded-full border border-(--primary-color)" />
+                                <img src={otherUser?.picture} alt="image" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-(--primary-color)" />
                                 <div className="flex flex-col">
                                     <h3 className="font-Plus-Jakarta-Sans font-medium text-xl text-(--primary-text) capitalize line-clamp-1">{ otherUser?.name }</h3>
                                     <h5 className="font-Plus-Jakarta-Sans font-light text-sm text-(--secondary-text) capitalize">
@@ -178,16 +177,16 @@ function Chat({ status, newMsg }) {
                         </div>
                         <div className="relative w-full flex items-center justify-between p-3 rounded-3xl bg-(--secondary-color) gap-4">
                             <div className="absolute bottom-full left-0">
-                                { showPicker? <EmojiPicker onEmojiClick={handleEmoji} searchDisabled={true} skinTonesDisabled={true} height={350} emojiStyle="facebook" /> : null }
+                                { showPicker? <EmojiPicker onEmojiClick={handleEmoji} searchDisabled={true} skinTonesDisabled={true} height={350} width={'w-full'} emojiStyle="facebook" /> : null }
                             </div>
                             <div className="w-full flex items-center gap-2">
                                 <div className="flex items-center justify-between gap-1">
                                     <PiSmileyLight onClick={() => setShowPicker(!showPicker)} className="text-3xl text-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-95" />
-                                    <PiPaperclipLight className="text-2xl text-(--primary-color) cursor-pointer duration-300 ease-in-out -rotate-45 hover:scale-95"/>
+                                    {/* <PiPaperclipLight className="text-2xl text-(--primary-color) cursor-pointer duration-300 ease-in-out -rotate-45 hover:scale-95"/> */}
                                 </div>
-                                <input onChange={(event) => setMsg(event.target.value)} value={msg} type="" placeholder="type a mesage..." autoComplete="off" className="w-full font-Plus-Jakarta-Sans font-normal text-base text-(--primary-text) placeholder:text-lg placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none placeholder:capitalize" />
+                                <input onChange={(event) => setMsg(event.target.value)} value={msg} type="" placeholder="type a mesage..." autoComplete="off" className="w-full font-Plus-Jakarta-Sans font-normal text-base text-(--primary-text) placeholder:text-base sm:placeholder:text-lg placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none placeholder:capitalize" />
                             </div>
-                            <div ref={sendBtnRef} onClick={sendMessage} className="min-w-12 min-h-12 w-12 h-12 flex items-center justify-center rounded-full text-2xl text-(--black-color) bg-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-90 hover:text-(--primary-text)">
+                            <div ref={sendBtnRef} onClick={sendMessage} className="min-w-10 min-h-10 sm:min-w-12 sm:min-h-12 sm:w-12 sm:h-12 flex items-center justify-center rounded-full text-xl sm:text-2xl text-(--black-color) bg-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-90 hover:text-(--primary-text)">
                                 <PiPaperPlaneTilt />
                             </div>
                         </div>

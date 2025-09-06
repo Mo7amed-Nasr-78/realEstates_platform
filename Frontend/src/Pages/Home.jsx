@@ -139,42 +139,42 @@ function Home() {
                 </div>
             </section>
             <section className="w-full my-20 sm:my-30">
-                <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-18 xs:gap-16 sm:gap-18 lg:gap-6">
-                    <div className="w-full lg:w-1/2 flex flex-col gap-4">
-                        <div className="w-full flex items-center gap-4">
+                <div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-18 xs:gap-16 sm:gap-18 lg:gap-6 xl:gap-12">
+                    <div className="w-full xl:w-[45%] flex flex-col gap-6">
+                        <div className="w-full flex items-center gap-3 md:gap-8 lg:gap-6 xl:gap-8">
                             <div className="w-1/2">
-                                <img src="/about1.png" alt="image" className="w-full xl:w-11/12 object-cover"/>
+                                <img src="/about1.png" alt="image" className="w-full xl:ms-auto object-cover"/>
                             </div>
                             <div className="w-1/2 flex flex-col">
-                                <h3 className="font-Plus-Jakarta-Sans font-medium text-base xs:text-2xl sm:text-4xl lg:text-2xl xl:text-3xl text-(--primary-text) capitalize pe-4 sm:leading-12 lg:leading-10 mb-6 sm:mb-10">every <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">week</span> there is <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">set</span> of two <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">tours</span></h3>
+                                <h3 className="font-Plus-Jakarta-Sans font-medium text-base xs:text-2xl sm:text-4xl md:text-4xl lg:text-2xl xl:text-2xl xxl:text-3xl text-(--primary-text) capitalize pe-4 sm:leading-12 md:leading-12 lg:leading-10 mb-6 sm:mb-10">every <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">week</span> there is <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">set</span> of two <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">tours</span></h3>
                                 <div className="flex items-center mb-6">
-                                    <img src="/home1.png" alt="image" className="h-10 xs:h-12 sm:h-14 z-[1] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
-                                    <img src="/home2.png" alt="image" className="h-10 xs:h-12 sm:h-14 -ms-4 xs:-ms-8 z-[2] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
-                                    <img src="/home3.png" alt="image" className="h-10 xs:h-12 sm:h-14 -ms-4 xs:-ms-8 z-[3] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
+                                    <img src="/home1.png" alt="image" className="h-10 xs:h-12 sm:h-14 md:h-16 lg:h-14 z-[1] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
+                                    <img src="/home2.png" alt="image" className="h-10 xs:h-12 sm:h-14 md:h-16 lg:h-14 -ms-4 xs:-ms-8 z-[2] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
+                                    <img src="/home3.png" alt="image" className="h-10 xs:h-12 sm:h-14 md:h-16 lg:h-14 -ms-4 xs:-ms-8 z-[3] duration-300 ease-in-out hover:-translate-y-2 cursor-pointer"/>
                                 </div>
-                                <p className="xl:w-full xxl:w-10/12 font-Plus-Jakarta-Sans font-light text-xs xs:text-base sm:text-xl lg:text-sm xl:text-base xxltext-lg text-(--secondary-text) line-clamp-2 xs:line-clamp-none">High quality photos, verified floor plans and virtual tours for all properties</p>
+                                <p className="xl:w-full xxl:w-10/12 font-Plus-Jakarta-Sans font-light text-xs xs:text-base sm:text-xl md:text-2xl lg:text-sm xl:text-base xxltext-lg text-(--secondary-text) line-clamp-2 xs:line-clamp-none">High quality photos, verified floor plans and virtual tours for all properties</p>
                             </div>
                         </div>
-                        <div className="w-full flex items-center lg:gap-6 xl:gap-4">
+                        <div className="w-full flex items-center gap-3 md:gap-8 lg:gap-6 xl:gap-8">
                             <div className="w-1/2 flex flex-col gap-5 lg:gap-0">
-                                <h3 className="font-Plus-Jakarta-Sans font-semibold text-4xl xs:text-5xl sm:text-7xl lg:text-6xl xxl:text-7xl text-(--primary-text) capitalize pe-4 leading-10 sm:mb-2 md:mb-8 xl:mb-6 xxl:mb-10">+12.8k</h3>
-                                <h4 className="font-Plus-Jakarta-Sans font-light text-sm xs:text-xl sm:text-2xl lg:text-xl xl:text-2xl text-(--primary-text) capitalize sm:mb-8 lg:mb-4 xl:mb-8">world wide satisfied customer</h4>
+                                <h3 className="font-Plus-Jakarta-Sans font-semibold text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-6xl xxl:text-7xl text-(--primary-text) capitalize pe-4 sm:mb-2 md:mb-3 xl:mb-4 xxl:mb-8">+12.8k</h3>
+                                <h4 className="font-Plus-Jakarta-Sans font-light text-sm xs:text-xl sm:text-2xl md:text-3xl lg:text-xl xl:text-2xl text-(--primary-text) capitalize sm:mb-8 lg:mb-4 xl:mb-8">world wide satisfied customer</h4>
                                 <div className="flex items-end xxl:gap-2">
                                     <div className="flex flex-col gap-1">
                                         <h4 className="font-Plus-Jakarta-Sans font-medium text-sm xs:*:text-lg md:text-2xl lg:text-lg text-(--primary-text) capitalize">pricing index</h4>
                                         <h5 className="font-Plus-Jakarta-Sans font-light text-sm md:text-xl lg:text-base text-(--secondary-text) capitalize line-clamp-1 xs:line-clamp-none">Explore our listings to know what's fits your needs</h5>
                                     </div>
-                                    <div className="hidden sm:flex lg:hidden xl:flex min-w-12 min-h-12 items-center justify-center rounded-full border-2 border-(--primary-color) duration-300 ease-in-out hover:scale-95 cursor-pointer">
+                                    <div className="hidden sm:flex lg:hidden xxl:flex min-w-12 min-h-12 items-center justify-center rounded-full border-2 border-(--primary-color) duration-300 ease-in-out hover:scale-95 cursor-pointer">
                                         <PiArrowUpRight className="text-2xl text-(--primary-color)"/>
                                     </div>
                                 </div>
                             </div>
                             <div className="w-1/2">
-                                <img src="/about2.png" alt="image" className="w-full xl:w-11/12 object-cover"/>
+                                <img src="/about2.png" alt="image" className="w-full xl:me-auto object-cover"/>
                             </div>
                         </div>
                     </div>
-                    <div className="w-full lg:w-1/2 h-full flex flex-col items-start justify-center">
+                    <div className="w-full xl:w-1/2 h-full flex flex-col items-start justify-center">
                         <h2 className="font-Playfair font-semibold text-4xl xs:text-5xl sm:text-6xl lg:text-5xl xl:text-6xl text-(--primary-text) capitalize mb-3 xs:mb-5 sm:mb-6">why choose us?</h2>
                         <h4 className="xl:w-10/12  font-Plus-Jakarta-Sans font-light text-base xs:text-lg sm:text-xl lg:text-lg xl:text-xl text-(--secondary-text) xs:leading-7 sm:leading-8 lg:leading-7 xl:leading-7 mb-12">We are providing the best properties for you because we believe that having a good home can greatly improve the quality of your life.</h4>
                         <div className="flex flex-col gap-10">
@@ -212,8 +212,8 @@ function Home() {
             <section className="w-full px-4 xs:px-0"> 
                 <div className="container mx-auto h-[540px] xs:h-[560px] sm:h-[620px] flex flex-col justify-between bg-[url(/banner.png)] bg-no-repeat object-cover object-center rounded-4xl my-20 xs:my-18 sm:my-22 p-12">
                     <div className="flex flex-col gap-2">
-                        <h2 className="xl:w-2/3 font-Playfair font-semibold text-3xl xs:text-4xl sm:text-5xl md:text-6xl text-(--primary-text) capitalize leading-10 xs:leading-12 sm:leading-15 md:leading-17">Find What You Need Buy, Rent, or <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">build</span> with Confidence</h2>
-                        <h3 className="w-full sm:w-3/5 xl:w-1/2 font-Plus-Jakarta-Sans font-light md:font-normal text-sm xs:text-base md:text-xl text-(--primary-text)">Explore a wide range of properties and services — from cozy homes to commercial spaces, land, and trusted professionals ready to bring your vision to life.</h3>
+                        <h2 className="xl:w-2/3 font-Playfair font-semibold text-3xl xs:text-4xl sm:text-5xl lg:text-6xl text-(--primary-text) capitalize leading-10 xs:leading-12 sm:leading-15 md:leading-17">Find What You Need Buy, Rent, or <span className="font-Delicious-Handrawn font-normal text-(--primary-color)">build</span> with Confidence</h2>
+                        <h3 className="w-full sm:w-3/5 md:w-11/12 xl:w-1/2 font-Plus-Jakarta-Sans font-light lg:font-normal text-sm xs:text-base md:text-xl text-(--primary-text)">Explore a wide range of properties and services — from cozy homes to commercial spaces, land, and trusted professionals ready to bring your vision to life.</h3>
                     </div>
                     <div className="flex flex-col gap-2">
                         <h2 className="font-Plus-Jakarta-Sans font-medium text-xl text-(--primary-text) capitalize mb-2">browse by categories</h2>

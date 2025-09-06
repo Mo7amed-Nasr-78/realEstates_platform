@@ -412,19 +412,19 @@ function Profile() {
 								{
 									Object.keys(personalInfo).map((field, idx) => {
 										return ( idx !== 4 &&
-											<div key={idx} className={`${[5,6].includes(idx)? 'col-span-12': 'col-span-6'} flex flex-col items-start gap-1`}>
+											<div key={idx} className={`${[5,6].includes(idx)? 'col-span-12': 'col-span-12 sm:col-span-6'} flex flex-col items-start gap-1`}>
 												<label htmlFor={field} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">{ field }</label>
 												<input type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 												<textarea type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'block': 'hidden'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) py-3 px-4 focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 											</div>
 										) || (	idx === 4 &&
-											<div key={idx} className="col-span-6">
+											<div key={idx} className="col-span-12 sm:col-span-6">
 												<Dropdown
 													items={['male', 'female']}
 													classes={'w-full left-0'}
 													onSelect={(value) => { setPersonalInfo({ ...personalInfo, gender: value }) }}
 												>
-													<div className={`col-span-6 flex flex-col items-start gap-1`}>
+													<div className={`flex flex-col items-start gap-1`}>
 														<label htmlFor={field} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">{ field }</label>
 														<div className={`${!personalInfo.gender? 'text-(--secondary-text)': 'text-(--primary-text)'} font-Plus-Jakarta-Sans font-light text-sm placeholder:font-normal capitalize w-full h-12 flex items-center rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}>
 															{ !personalInfo.gender? 'select your gender': personalInfo.gender }
@@ -445,7 +445,7 @@ function Profile() {
 									</div>
 									<button onClick={addCertification} className="flex items-center gap-1 hover:border-b-1 hover:border-(--primary-color)">
 										<PiPlus className="text-xl text-(--primary-color)"/>
-										<span className="font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-color) capitalize cursor-pointer">
+										<span className="hidden sm:block font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-color) capitalize cursor-pointer">
 											add certification
 										</span>
 									</button>
@@ -497,7 +497,7 @@ function Profile() {
 								{
 									Object.keys(socials).map((field, idx) => {
 										return (
-											<div key={idx} className={`col-span-12 flex items-center gap-5`}>
+											<div key={idx} className={`col-span-12 flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-5`}>
 												<label htmlFor={field} className="w-1/4 inline-block font-Plus-Jakarta-Sans font-normal text-lg text-(--primary-text) capitalize mb-2">{ field }:</label>
 												<input type="text" onChange={(event) => { setSocials({ ...socials, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field + ' link'} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 											</div>

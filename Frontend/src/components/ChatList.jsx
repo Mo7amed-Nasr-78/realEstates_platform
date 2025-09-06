@@ -65,22 +65,6 @@ function ChatList({ status, newMsg }) {
         }
     }, [newMsg])
 
-    // const readMessages = useCallback(async () => {
-
-    //     try {
-    //         const res = (await axios.put(
-    //             `${url}/api/chat/messages/read`,
-    //             {
-    //                 withCredentials: true
-    //             }
-    //         )).data;
-    //         console.log(res);
-    //     } catch(err) {  
-    //         console.log(err)
-    //     }
-
-    // })
-
     return (
         <div className="col-span-12 lg:col-span-4 xl:h-[80vh]">
             <div className="w-full h-full flex flex-col items-center rounded-3xl border-1 border-(--secondary-text) p-4 sm:p-6">

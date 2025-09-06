@@ -233,10 +233,10 @@ function PropertyDetails() {
                     </div>
 
                     <div className="col-span-12 lg:col-span-8 row-span-1 h-full">
-                        <div className="relative w-full h-100 md:h-140 rounded-4xl overflow-hidden border border-(--primary-color) before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-b before:from-transparent before:to-(--bg-color)">
+                        <div className="relative w-full h-90 md:h-140 rounded-4xl overflow-hidden border border-(--primary-color) before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-b before:from-transparent before:to-(--bg-color)">
                             <img src={property.propertyImages[imgView]} alt="image" loading="lazy" className="w-full h-full object-cover object-center"/>
-                            <div className="absolute w-full top-6 flex items-center justify-between px-6">
-                                <div className="flex items-center gap-4">
+                            <div className="absolute w-full top-6 flex items-center justify-end sm:justify-between px-6">
+                                <div className="hidden sm:flex items-center gap-4">
                                     <div className={`${!property.forSale? 'hidden': 'flex items-center gap-2'} py-2 px-3 rounded-xl bg-(--primary-text)`}>
                                         <div className="w-2 h-2 rounded-full bg-(--primary-color)"></div>
                                         <span className="font-Plus-Jakarta-Sans font-medium text-sm text-(--black-color) capitalize">for sale</span>
@@ -253,13 +253,13 @@ function PropertyDetails() {
                                 </div>
                             </div>
                             <Carousel
-                                carouselContainerClasses={'absolute left-1/2 bottom-8 w-[90%] h-28 md:h-42 -translate-x-1/2 rounded-3xl overflow-hidden'}
-                                carouselClasses={'flex items-center w-full h-full overflow-x-scroll gap-4 scrollbar-none'}
+                                carouselContainerClasses={'absolute left-1/2 bottom-8 w-[90%] h-20 sm:h-28 md:h-42 -translate-x-1/2 rounded-3xl overflow-hidden'}
+                                carouselClasses={'flex items-center w-full h-full overflow-x-scroll gap-2 sm:gap-4 scrollbar-none'}
                             >
                                 {
                                     property?
                                         property.propertyImages.map((item, idx) => {
-                                            return <img key={idx} src={item} loading="lazy" onClick={() => setImgView(idx)} alt="image" className="w-full h-full col-span-4 rounded-2xl md:rounded-3xl cursor-pointer duration-300 ease-in-out hover:scale-95"/>
+                                            return <img key={idx} src={item} loading="lazy" onClick={() => setImgView(idx)} alt="image" className="w-full h-full col-span-4 rounded-xl sm:rounded-2xl md:rounded-3xl cursor-pointer duration-300 ease-in-out hover:scale-95"/>
                                         })
                                     :
                                     null
@@ -461,7 +461,7 @@ function PropertyDetails() {
                                         <PiArrowUp />
                                     </div>
                                 </div>
-                                <ul ref={carouselRef} className="sm:px-5 lg:px-0 w-full h-340 flex flex-col gap-4 overflow-y-scroll scrollbar-none">
+                                <ul ref={carouselRef} className="sm:px-5 lg:px-0 w-full max-h-340 h-full flex flex-col gap-4 overflow-y-scroll scrollbar-none">
                                     {
                                         properties.map((property, idx) => {
                                             return (
@@ -528,7 +528,7 @@ function PropertyDetails() {
                                                     <label htmlFor={feild} className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ feild }:</label>
                                                     <Dropdown
                                                         items={idx === 3? purposeList: timesList}
-                                                        classes={'w-1/2 bottom-full'}
+                                                        classes={'w-4/5 bottom-full'}
                                                         onSelect={(value) => { setBooking({ ...booking, [feild]: value }) }}
                                                     >
                                                         <div className="w-full h-12 flex items-center justify-between border border-(--secondary-text) rounded-2xl px-3">

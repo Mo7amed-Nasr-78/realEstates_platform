@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useProps } from "../../components/PropsContext";
 import Alert from "../../components/Alert";
 import Loader from "../../components/Loader";
+import { FacebookProvider, Login } from 'react-facebook';
 
 function Signin() {
 	const navigate = useNavigate();
@@ -83,9 +84,20 @@ function Signin() {
 		}
 	}, []);
 
-	const googleAuth = useCallback(async () => {
-		window.location.href = `${url}/auth/google`;
-	}, []);
+	const handleFacebookLogIn = useCallback(async (response) => {
+        try {
+            const res = (await axios.post(
+                `${import.meta.env.VITE_URL}/auth/facebook`,
+                {
+                    facebookId: response.authResponse.facebookId,
+                    accessToken: response.authResponse.accessToken,
+                },
+            )).data;
+            console.log(res);
+        } catch (err) {
+            console.log(err);
+        }
+    }, []);
 
 	if (isLoading) return <Loader />
 
@@ -159,7 +171,7 @@ function Signin() {
 					<span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
 				</div>
 				<div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-					<Link onClick={googleAuth} className="w-[50%]">
+					<Link to={`${url}/auth/google`} className="w-1/2">
 						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
 							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
@@ -167,14 +179,17 @@ function Signin() {
 							</h4>
 						</button>
 					</Link>
-					<Link to={""} className="w-[50%]">
-						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
-							<img src="/facebook.svg" alt="icon" />
-							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
-								facebook
-							</h4>
-						</button>
-					</Link>
+					<FacebookProvider appId={import.meta.env.VITE_FACEBOOK_APP_ID} >
+                        <Login
+                            scope={['public_profile', 'email']}
+                            onSuccess={handleFacebookLogIn}
+                            onError={(err) => console.error(err)}
+                            className="w-1/2 h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95"
+                        >
+                            <img src="/facebook.svg" alt="icon" />
+                            <h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">facebook</h4>
+                        </Login>
+                    </FacebookProvider>
 				</div>
 			</div>
 			<div className="hidden lg:block w-[50%] h-full bg-[url(/public1.png)] rounded-tl-4xl rounded-bl-4xl shadow-(--primary-text)"></div>

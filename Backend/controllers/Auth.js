@@ -7,7 +7,7 @@ dotenv.config();
 // DB Models
 import User from '../models/userModel.js'
 
-const url = 'http://localhost:5173/';
+const url = process.env.FRONT_END_URL;
 
 const createToken = (payload) => {
 	const accessToken = jwt.sign(
@@ -114,11 +114,12 @@ export const facebookAuth = asyncHandler(
 
 		let user = await User.findOne({ $or: [{ facebookId }, { email }] });
 
+		console.log(user);
 		if (!user) {
 			user = new User({ 
 				facebookId,
-				name,
-				email,
+				// name,
+				// email,
 				picture
 			});
 

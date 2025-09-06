@@ -56,10 +56,6 @@ function Signup() {
         event.target.reset();
     }, [])
 
-    const googleAuth = () => {
-        window.location.href = `${url}/auth/google/?role=${searchParams.get('role')}`;
-    }
-
     const handleFacebookLogIn = useCallback(async (response) => {
         try {
             const res = (await axios.post(
@@ -105,16 +101,20 @@ function Signup() {
                     <span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
                 </div>
                 <div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-                    <button onClick={googleAuth} className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
-                        <img src="/google.svg" alt="icon" />
-                        <h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">google</h4>
-                    </button>
+                    <Link to={`${url}/auth/google/?role=${searchParams.get('role')}`} className="w-1/2">
+						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
+							<img src="/google.svg" alt="icon" />
+							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
+								google
+							</h4>
+						</button>
+					</Link>
                     <FacebookProvider appId={import.meta.env.VITE_FACEBOOK_APP_ID} >
                         <Login
                             scope={['public_profile', 'email']}
                             onSuccess={handleFacebookLogIn}
                             onError={(err) => console.error(err)}
-                            className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95"
+                            className="w-1/2 h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95"
                         >
                             <img src="/facebook.svg" alt="icon" />
                             <h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">facebook</h4>

@@ -31,7 +31,7 @@ function Dropdown({ children, items, icons = [], onSelect, classes }) {
             </div>
             {
                 open && (
-                    <ul ref={dropdownRef} className={`${classes} ${items.length > 10? 'h-52': ''} dropdown p-3 absolute mt-2 bg-(--bg-color) outline outline-offset-1 outline-white/10 rounded-xl shadow shadow-white/10 z-40 overflow-hidden origin-top`}>
+                    <ul ref={dropdownRef} className={`${classes} ${items.length > 10? 'h-52': ''} dropdown p-1.5 sm:p-3 absolute mt-2 bg-(--bg-color) outline outline-offset-1 outline-white/10 rounded-xl shadow shadow-white/10 z-40 overflow-hidden origin-top`}>
                         {
                             items.map((item, idx) => (
                                 <li

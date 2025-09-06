@@ -6,9 +6,6 @@ import { useNavigate,Link } from "react-router-dom";
 import axios from "axios";
 import Alert from "../components/Alert";
 import Modal from "../components/Modal";
-import {
-    PiFunnel,
-} from 'react-icons/pi';
 
 function Stats() {
 
@@ -34,7 +31,6 @@ function Stats() {
                         withCredentials: true,
                     }
                 )).data;
-                console.log(res);
                 setProperties(res.properties);
             } catch (err) {
                 console.log(err);
@@ -71,24 +67,20 @@ function Stats() {
         <main>
             <Header />
             <section className="pb-25 mt-26 lg:mt-36">
-                <div className="container mx-auto px-5 md:px-0">
+                <div className="container mx-auto px-4 md:px-0">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 mb-5 border-b border-(--secondary-text) gap-4 sm:gap-0">
                         <div className="flex flex-col gap-1">
-                            <h2 className="font-Playfair font-medium text-4xl text-(--primary-text) capitalize">your properties stats</h2>
-                            <h4 className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">Understand your properties' key metrics and insights.</h4>
+                            <h2 className="font-Playfair font-medium text-4xl text-(--primary-text) capitalize">properties stats</h2>
+                            <h4 className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">Understand your properties' key metrics.</h4>
                         </div>
-                        <button className="h-13 flex items-center gap-1 text-(--primary-text) px-5 border-1 border-(--secondary-text) duration-300 ease-in-out hover:text-(--primary-color) hover:border-(--primary-color) hover:scale-95 cursor-pointer rounded-3xl">
-                            <PiFunnel className="text-2xl"/>
-                            <span className="font-Playfair font-normal text-lg capitalize">filter</span>
-                        </button>
                     </div>
-                    <div className="w-full grid grid-cols-12 gap-8 sm:gap-5">
+                    <div className="w-full flex flex-col sm:grid sm:grid-cols-12 gap-8 sm:gap-5">
                         {
                             properties?
                                 properties.map((property, idx) => {
                                     return (
-                                        <div key={idx} className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3 relative">
-                                            <img src={property.images[0]} alt="property image" className="w-full h-46 object-cover rounded-2xl mb-2"/>
+                                        <div key={idx} className="w-full sm:col-span-6 md:col-span-4 lg:col-span-3 relative">
+                                            <img src={property.images[0]} alt="property image" className="w-full h-52 sm:h-46 object-cover rounded-2xl mb-2"/>
                                             <div className="absolute top-3 left-3 py-2 px-4 rounded-2xl bg-(--secondary-color)">
                                                 <span className="font-Plus-Jakarta-Sans font-medium text-sm text-(--primary-text)">{ property.price }$</span>
                                             </div>
