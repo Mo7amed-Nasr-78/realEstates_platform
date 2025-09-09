@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavList from "./NavList";
 import UserProfile from "./UserProfile";
 import "../../style.css";
 
-function Header() {
+const Header = React.memo(function Header() {
 
 	const [scrolling, setScrolling] = useState(false);
 
@@ -48,6 +48,8 @@ function Header() {
 			</div>
 		</header>
 	);
-}
+})
+
+
 
 export default Header;

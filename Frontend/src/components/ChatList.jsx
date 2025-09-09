@@ -7,10 +7,10 @@ import { useProps } from "./PropsContext";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 
-function ChatList({ status, newMsg }) {
+function ChatList({ status, newMsg, newChat }) {
 
     const { id } = useParams();
-    const { url, user } = useProps();
+    const { url } = useProps();
     const [ conversations, setConversations ] = useState([]);
     const [ search, setSearch ] = useState('');
 
@@ -65,6 +65,17 @@ function ChatList({ status, newMsg }) {
         }
     }, [newMsg])
 
+    useEffect(() => {
+        if (newChat) {
+            setConversations((prevs) => {
+                if (prevs.some((chat) => chat._id === newChat._id)) {
+                    return [ ...prevs ];
+                } 
+                return [ ...prevs, newChat ];
+            })
+        }
+    }, [newChat])
+
     return (
         <div className="col-span-12 lg:col-span-4 xl:h-[80vh]">
             <div className="w-full h-full flex flex-col items-center rounded-3xl border-1 border-(--secondary-text) p-4 sm:p-6">
@@ -100,8 +111,7 @@ function ChatList({ status, newMsg }) {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-4">
-                                                    <h5 className="w-full font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize line-clamp-1">{ conversation.lastMessage.content }</h5>
-                                                    <span className={`${conversation.lastMessage.read || conversation.lastMessage.sender === user._id? 'hidden': 'block'} w-2 h-2 rounded-full bg-(--primary-color)`}></span>
+                                                    <h5 className="w-full font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) line-clamp-1">{ conversation.lastMessage.content }</h5>
                                                 </div>
                                             </div>
                                         </li>

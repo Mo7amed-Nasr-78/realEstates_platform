@@ -10,11 +10,16 @@ export const initSse = async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader("Access-Control-Allow-Origin", process.env.FRONT_END_URL);
 
+    // Ensure headers are flushed immediately
+    if (res.flushHeaders) {
+        res.flushHeaders();
+    }
+
     clients.set(userId, res);
-    // console.log("client connected");
+    console.log("client connected");
 
     req.on('close', () => {
-        // console.log('client disconnected');
+        console.log('client disconnected');
         clients.delete(userId);
         res.end();
     });

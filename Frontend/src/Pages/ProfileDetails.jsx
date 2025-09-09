@@ -17,21 +17,21 @@ import {
 function ProfileDetails() {
 
     const { id } = useParams();
-    const { url } = useProps();
+    const { url, user } = useProps();
 	const navigate = useNavigate();
-    const [ user, setUser ] = useState(null);
+    const [ otherUser, setOtherUser ] = useState(null);
 	const [ profileTab, setProfileTab ] = useState('overview');
-
 
     useEffect(() => {
 		if (!profileTab) return;
+		if (id === user._id) navigate(`/profile`)
 
         const getProfileDetails = async () => {
             try {
                 const res = (await axios.get(
                     `${url}/api/users/profile/${id}`,
                 )).data;
-                setUser(res.profile);
+                setOtherUser(res.profile);
             } catch (err) {
                 console.log(err)
             }
@@ -48,13 +48,13 @@ function ProfileDetails() {
 					withCredentials: true
 				}
 			)).data;
-			navigate(`/messages/${res.chat._id}`)
+			navigate(`/messages/${res.chat._id}`);
 		} catch (err) {
 			console.log(err);
 		}
 	}, [id])
 
-    if (!user) return <Loader />
+    if (!otherUser) return <Loader />
 
     return (
 		<main>
@@ -66,20 +66,20 @@ function ProfileDetails() {
 						<div className="w-full flex flex-col items-center rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
 							<div className="relative flex flex-col items-center mb-4">
 								<img
-									src={user.picture}
+									src={otherUser.picture}
 									alt="image"
 									className="relative w-56 h-56 rounded-full border-2 border-(--primary-color) object-cover object-center before:content-['mohamed'] before:absolute before:w-20 before:h-20 before:bottom-0 before:right-0 before:rounded-full before:bg-red-500 before:z-50"
 								/>
-								<div className={`${user.isActive? 'block': 'hidden'} absolute bottom-2 right-1/4 translate-x-1/2 w-5 h-5 rounded-full bg-(--primary-color) border-4 border-(--bg-color) z-10`} title="active now"></div>
+								<div className={`${otherUser.isActive? 'block': 'hidden'} absolute bottom-2 right-1/4 translate-x-1/2 w-5 h-5 rounded-full bg-(--primary-color) border-4 border-(--bg-color) z-10`} title="active now"></div>
 							</div>
 							<h2 className="font-Plus-Jakarta-Sans font-medium text-3xl text-(--primary-text) capitalize text-center mb-1">
-								{user.name}
+								{otherUser.name}
 							</h2>
 							<h3 className="font-Plus-Jakarta-Sans font-normal text-lg text-(--secondary-text) capitalize text-center mb-4">
-								{user.jobTitle}
+								{otherUser.jobTitle}
 							</h3>
 							<button
-								onClick={() => { createNewChat(user._id) }}
+								onClick={() => { createNewChat(otherUser._id) }}
 								className="w-full h-13 font-Playfair font-bold capitalize text-lg leading-0 text-(--black-color) bg-(--primary-color) rounded-[20px] border-2 border-(--primary-color) duration-300 ease-in-out hover:scale-95 hover:text-(--primary-color) hover:bg-transparent cursor-pointer"
 							>
 								message
@@ -93,7 +93,7 @@ function ProfileDetails() {
 										email
 									</h4>
 									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{user.email}
+										{otherUser.email}
 									</h6>
 								</li>
 								<li className="flex flex-col gap-1 mb-3">
@@ -101,7 +101,7 @@ function ProfileDetails() {
 										address
 									</h4>
 									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{user.address}
+										{otherUser.address}
 									</h6>
 								</li>
 								<li className="flex flex-col gap-1">
@@ -109,7 +109,7 @@ function ProfileDetails() {
 										phone
 									</h4>
 									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{user.phone}
+										{otherUser.phone}
 									</h6>
 								</li>
 							</ul>
@@ -119,20 +119,20 @@ function ProfileDetails() {
 								</h4>
 								<div className="flex items-center gap-2">
 									<a
-										href={user.socialMediaHandles.facebook || null}
+										href={otherUser.socialMediaHandles.facebook || null}
 										target="_blank"
 									>
-										<div className={`${user.socialMediaHandles.facebook? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+										<div className={`${otherUser.socialMediaHandles.facebook? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
 											<PiFacebookLogoLight className="text-2xl" />
 										</div>
 									</a>
-									<a href={user.socialMediaHandles.instagram || null} target="_blank">
-										<div className={`${user.socialMediaHandles.instagram? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+									<a href={otherUser.socialMediaHandles.instagram || null} target="_blank">
+										<div className={`${otherUser.socialMediaHandles.instagram? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
 											<PiInstagramLogoLight className="text-2xl" />
 										</div>
 									</a>
-									<a href={user.socialMediaHandles.twitterX || null} target="_blank">
-										<div className={`${user.socialMediaHandles.twitterX? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+									<a href={otherUser.socialMediaHandles.twitterX || null} target="_blank">
+										<div className={`${otherUser.socialMediaHandles.twitterX? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
 											<PiXLogoLight className="text-2xl" />
 										</div>
 									</a>
@@ -157,9 +157,9 @@ function ProfileDetails() {
 								<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
 									about me:
 								</h2>
-								{user.aboutMe ? 
+								{otherUser.aboutMe ? 
 									<pre className="font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) text-wrap">
-										{user.aboutMe}
+										{otherUser.aboutMe}
 									</pre>
 								:
 									<div className="w-full flex flex-col items-center justify-center gap-1">
@@ -172,10 +172,10 @@ function ProfileDetails() {
 								<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
 									Certifications:
 								</h2>
-								{ user.certifications.length > 0 ?
+								{ otherUser.certifications.length > 0 ?
 									<ul className="flex flex-col gap-3 py-4">
 										{
-											user.certifications.map((certificate, index) => {
+											otherUser.certifications.map((certificate, index) => {
 												return (
 													<li key={index} className="flex items-start gap-3">
 														<div className="min-w-14 h-14 rounded-full flex items-center justify-center text-2xl text-(--primary-text) bg-[rgb(81,194,6,0.15)]">
@@ -204,10 +204,10 @@ function ProfileDetails() {
 								</h2>
 								<div className="flex items-center gap-2">
 									{
-									user.languages.length > 0?
-										user.languages.map((lang, idx) => {
+									otherUser.languages.length > 0?
+										otherUser.languages.map((lang, idx) => {
 											return (
-												<h4 className="py-2 px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-base text-(--secondary-text) capitalize rounded-2xl" key={idx}>
+												<h4 className="py-1.5 px-2.5 sm:py-2 sm:px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-sm sm:text-base text-(--secondary-text) capitalize rounded-2xl" key={idx}>
 													{lang}
 												</h4>
 											)

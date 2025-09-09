@@ -309,7 +309,7 @@ function Profile() {
 										user.languages.length > 0?
 											user.languages.map((lang, idx) => {
 												return (
-													<h4 className="py-2 px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-base text-(--secondary-text) capitalize rounded-2xl" key={idx}>
+													<h4 className="py-1.5 px-3 sm:py-2 sm:px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-sm sm:text-base text-(--secondary-text) capitalize rounded-xl sm:rounded-2xl" key={idx}>
 														{lang}
 													</h4>
 												)

@@ -90,7 +90,7 @@ function Home() {
                     </div>
                     <div className="w-full lg:w-1/2 h-full flex items-center my-auto relative">
                         <div className="w-full lg:w-11/12 ms-auto relative">
-                            <img src="/focalPoint.webp" alt="image" loading="lazy" className="w-full"/>
+                            <img rel="preload" src="/focalPoint.webp" alt="image" loading="lazy" className="w-full"/>
                             <img src="/asterisk_1.svg" alt="icon" loading="lazy" className="absolute -top-2 -left-2 xs:top-0 xs:left-0 scale-65 xs:scale-100"/>
                             <img src="/asterisk_2.svg" alt="icon" loading="lazy" className="absolute -bottom-18 right-2 xs:-bottom-24 xs:right-10 scale-75 xs:scale-100"/>
 

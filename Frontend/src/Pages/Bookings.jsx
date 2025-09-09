@@ -41,7 +41,6 @@ function Bookings() {
     }, [])
 
     const bookingUpdating = useCallback(async (event, bookingId, status) => {
-        console.log(event);
         try {
             const res = (await axios.post(
                 `${url}/api/booking/update/${bookingId}`,

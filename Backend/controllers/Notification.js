@@ -49,8 +49,13 @@ export const createNotification = asyncHandler (
 
 		const usersSet = getSseClients();
 		const receiverSse = usersSet.get(receiverId);
-		receiverSse.write(`event: ${event}\n`);
-		receiverSse.write(`data: ${JSON.stringify(notification)}\n\n`);
+		if (receiverSse) {
+			receiverSse.write(`event: ${event}\n`);
+			receiverSse.write(`data: ${JSON.stringify(notification)}\n\n`);
+			return true;
+		}
+		
+		return true;
 	}
 )
 
