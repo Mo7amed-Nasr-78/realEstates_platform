@@ -17,23 +17,39 @@ import {
 	PiBuildings,
 	PiOfficeChair
 } from "react-icons/pi";
-import { initSSE } from "../../../utils/initSSE";
+// import { initSSE } from "../../../utils/initSSE";
 import Alert from "../Alert";
 
 function UserProfile() {
 
-	const { url, user, setUser, favorites } = useProps();
+	const { 
+		url, 
+		user, 
+		setUser, 
+		favorites, 
+		socket, 
+		connectionStatus,
+		newNotification,
+	} = useProps();
 	const navigate = useNavigate();
 
 	// Component states
 	const [ select, setSelect ] = useState(null);
+	const [ windowWidth, setWindowWidth ] = useState(0);
+
+	// Notifications State
 	const [ notifications, setNotifications ] = useState([]);
 	const [ unreadNotifications, setUnreadNotifications ] = useState(0);
 	const [ openNotifications, setOpenNotifications ] = useState(false);
-	const [ windowWidth, setWindowWidth ] = useState(0);
+
+	// Messages State
+	const [ chats, setChats ] = useState([]);
+	const [ openMsgs, setOpenMsgs ] = useState(false);
+	const [ newMsg, setNewMsg ] = useState(false);
 
 	// Component Refs
 	const notificationListRef = useRef(null);
+	const messagesListRef = useRef(null);
 
 	const listData = useMemo(() => {
 		if (!user) return { items: [], icons: [] };
@@ -124,42 +140,101 @@ function UserProfile() {
 		}
 		getNotifications();
 
+		const getChats = async () => {
+			try {
+				const res = (await axios.get(
+					`${url}/api/chat/conversations`,
+					{
+						withCredentials: true,
+					}
+				)).data;
+				setChats(res.conversations);
+			} catch (err) {
+				console.log(err);
+				Alert('error', err.response?.data?.message);
+			}
+		}
+		getChats();
+
 		function handleClickOutside(event) {
-		if (notificationListRef.current && !notificationListRef.current.contains(event.target)) {
-			setOpenNotifications(false);
-		}
+			if (notificationListRef.current && !notificationListRef.current.contains(event.target)) {
+				setOpenNotifications(false);
+			}
+
+			if (messagesListRef.current && !messagesListRef.current.contains(event.target)) {
+				setOpenMsgs(false);
+			}
         }
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-	}, [user])
-
-	useEffect(() => {
-		if (!user) return;
-		const es = initSSE(`${url}/events`);
-
-		const handleNotification = (event) => {
-			const notification = JSON.parse(event.data);
-			setUnreadNotifications((prev) => prev + 1);
-			setNotifications((prevs) => [ ...prevs, notification ].reverse());
-			console.log(notification);
-		}
 
 		const handleResize = () => {
 			setWindowWidth(window.innerWidth);
 		}
 		handleResize();
-
+		
+        document.addEventListener("mousedown", handleClickOutside);
 		window.addEventListener('resize', handleResize);
-		es.addEventListener("notification", handleNotification);
-		return () => {
-			es.removeEventListener("notification", handleNotification);
+
+        return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
 			window.removeEventListener('resize', handleResize);
+        };
+	}, [user])
+
+	useEffect(() => {
+		if (!newNotification) return;
+
+		setUnreadNotifications((prev) => prev + 1);
+		setNotifications((prevs) => {
+			return [ ...prevs, newNotification ]
+		})
+
+	}, [newNotification]);
+
+	useEffect(() => {
+		if (!socket || !connectionStatus) return;
+
+		socket.on('newMessage', (newMsg) => {
+			setNewMsg(true);
+			setChats((prevs) => {
+				return prevs.map((chat) => {
+					if (chat._id === newMsg.chat._id) {
+						return { ...chat, lastMessage: newMsg }
+					} else {
+						return chat;
+					}
+				})
+			})
+		})
+
+		socket.on('deleteMessage', (deletedMsg) => {
+			console.log(deletedMsg);
+			setChats((prevs) => {
+				return prevs.map((chat) => {
+					if (chat._id === deletedMsg.chat) {
+						return { ...chat, lastMessage: { ...deletedMsg, content: 'Msg Deleted' } }
+					} else {
+						return chat;
+					}
+				})
+			})
+        })
+
+		socket.on('newChat', (newChat) => {
+			setNewMsg(true)
+			setChats((prevs) => {
+				if (!prevs.some((chat) => chat._id === newChat._id)) {
+					return [ ...prevs, newChat ]
+				}
+			})
+        })
+
+		return () => {
+			socket.off('newMessage');
+			socket.off('deleteMessage');
+			socket.off('newChat');
 		}
-	}, [url]);
+
+	}, [socket, connectionStatus])
 
 	const readNotifications = useCallback(async () => {
 		if (unreadNotifications < 1) return;
@@ -204,7 +279,7 @@ function UserProfile() {
 			console.log(err);
 		}
 		event.target.disabled = false;
-	}, [])
+	}, [notifications])
 
 	const signOut = useCallback(async () => {
 		try {
@@ -217,7 +292,6 @@ function UserProfile() {
 			console.log(err)
 		}
 	}, []);
-
 
 	return (
 		<div className="flex items-center justify-center gap-4">
@@ -253,17 +327,62 @@ function UserProfile() {
 				</>
 			) : (
 				<div className="flex items-center gap-2">
-					<Link to='/messages' className="hidden sm:block">
-						<div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#51c20624] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
+					<div className="hidden sm:block sm:relative">
+						<div onClick={() => { setNewMsg(false); setOpenMsgs(!openMsgs) }} className="relative w-10 h-10 flex items-center justify-center rounded-full bg-[#51c20624] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<PiChatTeardropLight className="text-xl text-(--primary-text)" />
+							<div className={`${newMsg? 'block': 'hidden'} absolute top-3 right-3 w-2 h-2 rounded-full bg-red-600 border-2 border-(--bg-color)`}></div>
 						</div>
-					</Link>
+						<div ref={messagesListRef} className={`${openMsgs? 'block': 'hidden'} absolute right-0 w-full sm:w-86 dropdown p-4 sm:p-3 mt-2 bg-(--bg-color) outline outline-offset-1 outline-white/10 rounded-xl shadow shadow-white/10 z-10 origin-top`}>
+							<div className="flex items-center justify-start pb-2">
+								<h2 className="font-Plus-Jakarta-Sans font-normal text-lg text-(--primary-text) capitalize">messages</h2>
+							</div>
+							<ul className={`h-86 flex flex-col gap-1.5 overflow-y-scroll scrollbar-none`}>
+								{
+									chats.length > 0? 
+										chats.map((chat, idx) => (
+											<Link key={idx} to={`/messages/${chat._id}`}>
+												<li
+													className={`${chat.lastMessage.receiver === user._id && !chat.lastMessage.read? 'bg-[rgb(81,194,6,0.06)]': 'bg-transparent'} relative w-full flex items-start gap-3 px-2 py-3 rounded-lg duartion-300 ease-in-out text-(--secondary-text) hover:bg-[rgb(81,194,6,0.1)] cursor-pointer before:absolute before:w-full before:bottom-0 before:left-0 before:border-b before:border-[rgb(81,194,6,0.2)]`}
+													>
+														<img src={chat.otherUser.picture} alt="image" className="w-12 h-12 rounded-full border border-(--primary-color)" />
+														<div className="w-full flex flex-col">
+															<div className="w-full flex flex-col">
+																<div className="w-full flex items-center justify-between">
+																	<h3 className="font-Plus-Jakarta-Sans font-light text-base text-left first-letter:capitalize text-(--primary-text) line-clamp-1"> { chat.otherUser.name }</h3>
+																	<span className="font-Plus-Jakarta-Sans text-xs text-(--secondary-text)">{ new Date(chat.lastMessage.createdAt).toLocaleDateString('en-Eg', { dateStyle: 'short', timeZone: 'Africa/Cairo' }) } - { new Date(chat.lastMessage.createdAt).toLocaleTimeString('en-Eg', { timeStyle: 'short', timeZone: 'Africa/Cairo' }) }</span>
+																</div>
+																<div className="w-full flex items-center justify-between">
+																	<div className="font-Plus-Jakarta-Sans text-(--secondary-text) font-light text-sm flex items-center gap-1">
+																		<span className={`${chat.lastMessage.receiver === user._id? 'hidden': 'block'}`}>Me:</span>
+																		<h4 className="w-full text-left text-nowrap line-clamp-1">{ chat.lastMessage.content }</h4>
+																	</div>
+																	<span className={`${chat.lastMessage.receiver === user._id && !chat.lastMessage.read? 'block' : 'hidden'} w-2 h-2 rounded-full bg-(--primary-color)`}></span>
+																</div>
+															</div>
+														</div>
+												</li>
+											</Link>
+										))
+									:
+										<div className="w-full h-full flex flex-col items-center justify-center gap-2">
+											<img src="/notifications.webp" alt="icon" className="w-32"/>
+											<h5 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no Messages found</h5>
+										</div>
+								}
+							</ul>
+							<Link to={'/messages'} className="inline-block w-full pt-2">
+								<span className="inline-block w-full font-Plus-Jakarta-Sans font-medium text-sm text-(--primary-color) capitalize text-center">all messages</span>
+							</Link>
+						</div>
+					</div>
+
 					<Link to='/favorites' className="hidden sm:block">
 						<div className="relative w-10 h-10 flex items-center justify-center rounded-full bg-[#51c20624] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<PiHeartLight className="text-xl text-(--primary-text)" />
 							<div className={`${favorites.length > 0? 'block': 'hidden'} absolute top-3 right-2 w-2 h-2 rounded-full bg-red-600 border-2 border-(--bg-color)`}></div>
 						</div>
 					</Link>
+
 					<div onClick={readNotifications} className="sm:relative">
 						<div onClick={() => setOpenNotifications(!openNotifications)} className="relative w-10 h-10 flex items-center justify-center rounded-full bg-[#51c20624] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<PiBellLight className="text-xl text-(--primary-text)" />

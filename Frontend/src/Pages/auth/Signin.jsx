@@ -85,18 +85,18 @@ function Signin() {
 	}, []);
 
 	const handleFacebookLogIn = useCallback(async (response) => {
+		if (!response.authResponse) return;
         try {
-            const res = (await axios.post(
-                `${import.meta.env.VITE_URL}/auth/facebook`,
+            await axios.post(
+                `${url}/auth/facebook/callback`,
                 {
-                    facebookId: response.authResponse.facebookId,
+                    facebookId: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken,
                 },
-            )).data;
-            console.log(res);
+            );
         } catch (err) {
             console.log(err);
-        }
+        } 
     }, []);
 
 	if (isLoading) return <Loader />

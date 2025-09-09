@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useProps } from "../components/PropsContext";
 import { Link } from "react-router-dom";
 import axios from 'axios';
@@ -19,6 +19,7 @@ import Loader from "../components/Loader";
 import Pagination from "../components/Paginations";
 import Dropdown from "../components/Dropdown";
 import { priceRange, propertyCategories, roomsAndBathrooms } from "../../Data/Data";
+import { useCallback } from "react";
 
 function Listings() {
 
@@ -53,7 +54,7 @@ function Listings() {
 
     }, [user, page, filter]);
 
-    const updateFilter = useMemo((field, value) => {
+    const updateFilter = useCallback((field, value) => {
 
         if (field === 'price') {
             switch(value) {
@@ -132,7 +133,7 @@ function Listings() {
                             <span className="font-Playfair font-normal text-lg capitalize">filter</span>
                         </button>
                     </div>
-                    <div className={`${showFilter? 'block': 'hidden'} w-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-3 bg-[rgb(204,204,204,0.08)] rounded-3xl mb-5 p-3`}>
+                    <div className={`${showFilter? 'block': 'hidden'} w-full flex flex-wrap xl:flex-nowrap items-center gap-4 sm:gap-3 bg-[rgb(204,204,204,0.08)] rounded-3xl mb-5 p-3`}>
                         <div className="w-full sm:w-1/2 py-3 flex items-center gap-2 border border-(--secondary-text) rounded-2xl px-2">
                             <PiMagnifyingGlass className="text-xl text-(--primary-color)" />
                             <input onChange={(event) => updateFilter('query', event.target.value)} value={filter.query} name="query" type="text" autoComplete="off" placeholder="Search about your place ..." className="w-full h-full font-Plus-Jakarta-Sans font-light text-base text-(--primary-text) placeholder:text-base placeholder:capitalize focus:outline-none" />

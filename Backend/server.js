@@ -46,7 +46,18 @@ app.use(
 		credentials: true,
 	})
 );
-app.use(compression());
+
+
+// custom filter function
+function shouldCompress(req, res) {
+	if (req.path === "/events") {
+		return false; 
+	}
+	return compression.filter(req, res);
+}
+
+app.use(compression({ filter: shouldCompress }));
+
 
 // Routes
 app.use("/api/users", userRouter);

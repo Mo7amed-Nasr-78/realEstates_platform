@@ -6,7 +6,7 @@ router.route("/google/callback").get(googleAuth);
 
 router.route("/google").get(googleRedirect);
 
-router.route("/facebook").post(facebookAuth)
+router.route("/facebook/callback").post(facebookAuth)
 
 export default router;
 

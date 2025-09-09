@@ -211,7 +211,6 @@ function PropertyDetails() {
 					withCredentials: true
 				}
 			)).data;
-			console.log(res);
 			navigate(`/messages/${res.chat._id}`)
 		} catch (err) {
 			console.log(err);
@@ -221,7 +220,7 @@ function PropertyDetails() {
     if (isLoading || !property || !properties) return <Loader />
     
     return (
-        <main>
+        <main className={`${openModal? 'overflow-hidden': ''}`}>
             <Header />
             <section className="w-full mt-26 lg:mt-36 mb-25">
                 <div className="container mx-auto grid grid-cols-12 grid-rows-1 gap-6 px-5 md:px-0">
@@ -509,7 +508,7 @@ function PropertyDetails() {
             {
                 openModal?
                     <Modal>
-                        <div className="md:w-160 xl:w-200 rounded-3xl bg-(--bg-color) p-6">
+                        <div className="w-full min-h-full md:w-160 xl:w-200 rounded-3xl bg-(--bg-color) p-6">
                             <div className="flex flex-col gap-1 mb-5 sm:mb-3">
                                 <h2 className="font-Playfair font-medium text-3xl sm:text-4xl text-(--primary-text) capitalize">veiwing book</h2>
                                 <h3 className="font-Plus-Jakarta-Sans font-light text-base sm:text-lg text-(--secondary-text) first-letter:capitalize">Property Viewing Booking Details with User and Property Info</h3>
@@ -521,7 +520,7 @@ function PropertyDetails() {
                                             return ( ![3,4].includes(idx) &&
                                                 <div key={idx} className={`${![2,5].includes(idx)? 'col-span-12': 'col-span-12 sm:col-span-6'} flex flex-col gap-1`}>
                                                     <label htmlFor={feild} className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ feild }:</label>
-                                                    <input type="text" onChange={(event) => { setBooking({ ...booking, [feild]: event.target.value }) }} value={booking[feild]} name={feild} id={feild} placeholder={'Enter Your ' + feild} className="w-full h-12 border border-(--secondary-text) rounded-2xl px-3 text-lg text-(--primary-text) placeholder:text-base placeholder:text-(--secondary-text) focus:outline-none"/>
+                                                    <input type="text" onChange={(event) => { setBooking({ ...booking, [feild]: event.target.value }) }} value={booking[feild]} name={feild} id={feild} placeholder={'Enter Your ' + feild} className="w-full h-12 border border-(--secondary-text) rounded-2xl px-3 text-lg text-(--primary-text) placeholder:text-base placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none"/>
                                                 </div>
                                             ) || ( [3,4].includes(idx) &&
                                                 <div key={idx} className="col-span-12 sm:col-span-6 flex flex-col gap-1">
@@ -532,7 +531,7 @@ function PropertyDetails() {
                                                         onSelect={(value) => { setBooking({ ...booking, [feild]: value }) }}
                                                     >
                                                         <div className="w-full h-12 flex items-center justify-between border border-(--secondary-text) rounded-2xl px-3">
-                                                            <span className={`${booking[feild]? 'text-(--primary-text)': `text-(--secondary-text)`} text-base capitalize`}>{ !booking[feild]? `Enter Your ${feild}`: booking[feild]  }</span>
+                                                            <span className={`${booking[feild]? 'text-(--primary-text)': `text-(--secondary-text) font-light`} text-base capitalize`}>{ !booking[feild]? `Enter Your ${feild}`: booking[feild]  }</span>
                                                             <PiCaretDown className="text-2xl text-(--primary-text)"/>
                                                         </div>
                                                     </Dropdown>

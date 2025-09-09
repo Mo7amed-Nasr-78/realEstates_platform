@@ -101,7 +101,7 @@ export const signin = asyncHandler(async (req, res) => {
 // @Access private
 export const currentUser = asyncHandler(async (req, res) => {
 	const { email } = req.user;
-	const user = await User.findOne({ email });
+	const user = await User.findOne({ email }, { password: 0, googleId: 0, otp: 0 });
 
 	// console.log(req.headers["user-agent"]);
 	if (!user) {

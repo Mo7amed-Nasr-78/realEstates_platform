@@ -39,16 +39,18 @@ function App() {
 	const [ user, setUser ] = useState(null);
 	const [ favorites, setFavorites ] = useState([]);
 	const [ newFavorite, setNewFavorite ] = useState(null);
+	const [ newNotification, setNewNotification ] = useState(null);
 	const [ isLoading, setIsLoading ] = useState(false);
 
 	// Socket States
 	const [ socket, setSocket ] = useState(null);
 	const [ connectionStatus, setConnectionStatus ] = useState(false);
 
-	// Socket.io setup
+	// Socket.io and Sse connection
 	useEffect(() => {
 		if (!user) return;
 
+		// Socket
 		const socket = io(url, {
 			withCredentials: true,
 			reconnection: true,
@@ -69,9 +71,20 @@ function App() {
 			});
 		});
 
+		// Sse
+		const sse = initSSE(`${url}/events`);
+
+		const handleNotification = (event) => {
+			const newNotification = JSON.parse(event.data);
+			setNewNotification(newNotification);
+		}
+
+		sse.addEventListener("newNotification", handleNotification);
 		// That is gonna run on app end
 		return () => {
 			socket.disconnect();;
+			sse.removeEventListener("newNotification", handleNotification);
+			sse.close();
 		}
 
 	}, [user?._id]);
@@ -94,22 +107,6 @@ function App() {
 			}
 		};
 		checkUserSession();
-
-		// Session Checkout
-		const sessionChecker = setInterval(() => {
-			checkUserSession();
-		}, 1000 * 60 * 60);
-
-		// Sse connections setup
-		let es;
-		if (user !== null) {
-			es = initSSE(`${url}/events`);
-		}
-
-		return () => {
-			es.close();
-			clearInterval(sessionChecker);
-		}
 
 	}, []);
 
@@ -186,7 +183,8 @@ function App() {
 				setNewFavorite: (property) => favoriteListChecking(property),
 				page,
 				setPage,
-				// Socket values
+				newNotification,
+				// Socket
 				socket,
 				connectionStatus,
 			}}>

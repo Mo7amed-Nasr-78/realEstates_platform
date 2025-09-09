@@ -205,6 +205,7 @@ export const createBooking = asyncHandler(
             agent: property.user,
             property: property._id
         })
+        await booking.save();
 
         property.bookings.push(booking._id);
         await property.save();
@@ -214,9 +215,8 @@ export const createBooking = asyncHandler(
             throw new Error('internal server error');
         }
 
-        const user = await User.findOne({ _id: userId }).select('name');
-
         await createNotification({
+            event: 'newNotification',
             senderId: userId,
             receiverId: property.user.toString(),
             content: `sent to you booking invitation on ${property.name}`
@@ -255,25 +255,26 @@ export const updateBooking = asyncHandler(
             throw new Error(`the booking is already updated to ${status}`);
         }
 
+        // func for notify sending
+        async function sendNotification(content) {
+            await createNotification({
+                event: 'newNotification',
+                senderId: userId,
+                receiverId: booking.user.toString(),
+                content
+            });
+        }
+
         if (booking.status === 'pending' && status.includes('accepted')) {
             booking.status = status;
             await booking.save();
-            await createNotification({
-                event: 'notification',
-                senderId: userId,
-                receiverId: booking.user.toString(),
-                content: `${status} your booking invitation on ${booking.property.name}`,
-            });
+            sendNotification(`${status} your booking invitation on ${booking.property.name}`);
         } else if (booking.status === 'accepted' && status.includes('visited')) {
             booking.status = status;
             await booking.save();
+            sendNotification(`confirm your visiting on ${booking.property.name}, all the best`);
         } else if (booking.status === 'pending' && status.includes('rejected')) {
-            await createNotification({
-                event: 'notification',
-                senderId: userId,
-                receiverId: booking.user.toString(),
-                content: `${status} your booking invitation on ${booking.property.name}, send it later`
-            });
+            sendNotification(`${status} your booking invitation on ${booking.property.name}, send it later`)
             await Booking.deleteOne({ _id: booking._id });
             res.status(200).json({ 
                 status: 200, 

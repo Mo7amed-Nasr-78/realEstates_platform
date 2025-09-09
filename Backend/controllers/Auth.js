@@ -61,7 +61,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
 			res.cookie("accessToken", accessToken, {
 				secure: true,
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
 				maxAge: 24 * 60 * 60 * 1000
 			});
 			
@@ -93,10 +93,12 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		id: newUser._doc._id,
 		email: newUser._doc.email,
 	});
+	
 	res.cookie("accessToken", accessToken, {
 		secure: true,
 		httpOnly: true,
 		sameSite: "none",
+		maxAge: 24 * 60 * 60 * 1000,
 	});
 
 	res.redirect(url);
@@ -106,23 +108,24 @@ export const facebookAuth = asyncHandler(
 	async (req, res) => {
 		const { facebookId, accessToken } = req.body;
 
-		const response = await fetch(`https://graph.facebook.com/me?access_token=${accessToken}`);
+		const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`);
+
 		const fbUser = await response.json();
 
+		console.log(fbUser);
 		if (fbUser.id !== facebookId) {
 			res.status(400);
 			throw new Error('invalid facebook token');
 		}
 
 		let user = await User.findOne({ $or: [{ facebookId }, { email }] });
-
-		console.log(user);
 		if (!user) {
 			user = new User({ 
 				facebookId,
-				// name,
-				// email,
-				picture
+				name: fbUser.name,
+				email: fbUser.email,
+				password: await bcrypt.hash(facebookId, 10),
+				picture: fbUser.picture.data.url
 			});
 
 			await user.save();
@@ -132,10 +135,12 @@ export const facebookAuth = asyncHandler(
 			id: user._id,
 			email: user.email,
 		});
+
 		res.cookie("accessToken", token, {
 			secure: true,
 			httpOnly: true,
 			sameSite: "none",
+			maxAge: 24 * 60 * 60 * 1000,
 		});
 
 		res.redirect(url)
