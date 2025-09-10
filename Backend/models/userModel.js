@@ -56,6 +56,11 @@ const userSchema = mongoose.Schema({
         required: false,
         default: ''
     },
+    facebookId: {
+        type: String,
+        required: false,
+        default: ''
+    },
     picture: {
         type: String,
         required: false,

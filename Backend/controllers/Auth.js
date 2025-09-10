@@ -22,6 +22,17 @@ const createToken = (payload) => {
 	return accessToken;
 };
 
+function generatePassword(length = 16) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    
+    for (let i = 0; i < length; i++) {
+        password += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    return password;
+}
+
 export const googleRedirect = async (req, res) => {
 	const role = req.query.role;
 	const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.REDIRECT_URI}&response_type=code&scope=openid%20email%20profile&state=${role}`;
@@ -85,7 +96,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		name: decoded.name,
 		email: decoded.email,
 		googleId: decoded.sub,
-		password: await bcrypt.hash(decoded.sub, 10),
+		password: await bcrypt.hash(generatePassword(length = 12), 10),
 		picture: "https://res.cloudinary.com/de5sekaom/image/upload/v1755117756/default-profile-img_f7br6d.jpg",
 	});
 
@@ -112,19 +123,19 @@ export const facebookAuth = asyncHandler(
 
 		const fbUser = await response.json();
 
-		console.log(fbUser);
 		if (fbUser.id !== facebookId) {
 			res.status(400);
 			throw new Error('invalid facebook token');
 		}
 
 		let user = await User.findOne({ $or: [{ facebookId }, { email }] });
+
 		if (!user) {
 			user = new User({ 
 				facebookId,
 				name: fbUser.name,
 				email: fbUser.email,
-				password: await bcrypt.hash(facebookId, 10),
+				password: await bcrypt.hash(generatePassword(length = 12), 10),
 				picture: fbUser.picture.data.url
 			});
 

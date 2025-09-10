@@ -100,8 +100,10 @@ function App() {
 				).data;
 				setUser(res.user);
 			} catch (err) {
-				console.log('Session error: ', err.message);
 				setUser(null);
+				if (err.status !== 401) {
+					Alert('error', err.response?.data?.message);
+				}
 			} finally {
 				setIsLoading(false)
 			}
@@ -116,7 +118,7 @@ function App() {
 		const getFavorites = async () => {
 			try {
 				setIsLoading(true);
-				const res = (await axios.get(
+				const { data } = await axios.get(
 					`${url}/api/favorite/getAll`, 
 					{ 
 						withCredentials: true,
@@ -124,10 +126,12 @@ function App() {
 							page: page
 						}
 					}
-				)).data;
-				setFavorites(res.favorites);
+				);
+				if (data.favorites.length > 0) {
+					setFavorites(data.favorites);
+				}
 			} catch (err) {
-				console.log(err.message);
+				Alert('error', err.response?.data?.message);
 			} finally {
 				setIsLoading(false);
 			}

@@ -18,7 +18,7 @@ import { languages } from "../../Data/Data";
 import Alert from "../components/Alert";
 import axios from "axios";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 
 function Profile() {
@@ -26,6 +26,7 @@ function Profile() {
 	const info = { name: '', phone: '', address: '', age: '', gender: '', jobTitle: '', aboutMe: '' }
 
 	const { url, user, setUser, isLoading } = useProps();
+	const navigate = useNavigate();
 
 	// Property form states
 	const [ img, setImg ] = useState(null);
@@ -91,8 +92,10 @@ function Profile() {
 			Alert('success', res.message);
 			setUser(res.user);
 		} catch (err) {
-			console.log(err);
 			Alert('warning', err.response?.data?.message);
+			if (err.response.status === 404) {
+				navigate('/');
+			}
 		} finally {
 			setSpin(false);
 		}

@@ -126,16 +126,17 @@ function UserProfile() {
 
 		const getNotifications = async () => {
 			try {
-				const res = (await axios.get(
+				const { data } = await axios.get(
 					`${url}/api/notification/get`,
 					{
 						withCredentials: true,
 					}
-				)).data;
-				setUnreadNotifications(res.unreadNotifications.length);
-				setNotifications(res.allNotifications);
+				);
+
+				setUnreadNotifications(data.unreadNotifications.length);
+				setNotifications(data.allNotifications);
 			} catch (err) {
-				console.log(err);
+				Alert('error', err.response?.data?.message);
 			}
 		}
 		getNotifications();
@@ -150,7 +151,6 @@ function UserProfile() {
 				)).data;
 				setChats(res.conversations);
 			} catch (err) {
-				console.log(err);
 				Alert('error', err.response?.data?.message);
 			}
 		}
@@ -185,7 +185,7 @@ function UserProfile() {
 
 		setUnreadNotifications((prev) => prev + 1);
 		setNotifications((prevs) => {
-			return [ ...prevs, newNotification ]
+			return [ ...prevs, newNotification ].reverse();
 		})
 
 	}, [newNotification]);
@@ -207,7 +207,6 @@ function UserProfile() {
 		})
 
 		socket.on('deleteMessage', (deletedMsg) => {
-			console.log(deletedMsg);
 			setChats((prevs) => {
 				return prevs.map((chat) => {
 					if (chat._id === deletedMsg.chat) {
@@ -223,7 +222,7 @@ function UserProfile() {
 			setNewMsg(true)
 			setChats((prevs) => {
 				if (!prevs.some((chat) => chat._id === newChat._id)) {
-					return [ ...prevs, newChat ]
+					return [ ...prevs, newChat ].reverse();
 				}
 			})
         })
@@ -257,9 +256,9 @@ function UserProfile() {
 				}
 			);
 		} catch (err) {
-			console.log(err);
 			setUnreadNotifications(unreadCount);
 			setNotifications(currentNotifications);
+			Alert('error', err.response?.data?.message);
 		}
 	}, [unreadNotifications, notifications]);
 
@@ -276,20 +275,27 @@ function UserProfile() {
 			Alert('success', res.message);
 			setNotifications([]);
 		} catch (err) {	
-			console.log(err);
+			Alert('error', err.response?.data?.message);
 		}
 		event.target.disabled = false;
 	}, [notifications])
 
 	const signOut = useCallback(async () => {
 		try {
-			(await axios.get(
+			(await axios.post(
 				`${url}/api/users/logout`,
+				{},
 				{ withCredentials: true }
 			)).data
 			setUser(null);
 		} catch (err) {
-			console.log(err)
+			if (err.response.status === 404) {
+				Alert('error', 'the account isn\'t found');
+			} else if (err.response.status === 400) {
+				Alert('error', 'bad request');
+			} else {
+				Alert('error', 'internal server error');
+			}
 		}
 	}, []);
 
@@ -404,7 +410,7 @@ function UserProfile() {
 														<img src={item.sender.picture} alt="image" className="w-12 h-12 rounded-full border border-(--primary-color)" />
 														<div className="flex flex-col">
 															<span className="font-Plus-Jakarta-Sans font-light text-sm text-left first-letter:capitalize mb-1">
-																<span className="text-(--primary-color)"> { item.sender.name } </span>
+																<span className="text-(--primary-color) me-1"> { item.sender.name } </span>
 																{item.content}
 															</span>
 															<div className="flex items-center justify-between">

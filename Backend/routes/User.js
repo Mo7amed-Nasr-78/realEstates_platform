@@ -26,7 +26,7 @@ router.route("/signup").post(signup);
 
 router.route("/signin").post(signin);
 
-router.route("/logout").get(validateToken, logOutUser);
+router.route("/logout").post(validateToken, logOutUser);
 
 router.route("/current").get(validateToken, currentUser);
 
