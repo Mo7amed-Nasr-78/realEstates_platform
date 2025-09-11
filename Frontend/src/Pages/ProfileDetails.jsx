@@ -23,7 +23,7 @@ function ProfileDetails() {
 	const [ profileTab, setProfileTab ] = useState('overview');
 
     useEffect(() => {
-		if (!profileTab) return;
+		if (!profileTab || !user) return;
 		if (id === user._id) navigate(`/profile`)
 
         const getProfileDetails = async () => {

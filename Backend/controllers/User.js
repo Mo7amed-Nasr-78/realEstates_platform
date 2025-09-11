@@ -115,7 +115,12 @@ export const currentUser = asyncHandler(async (req, res) => {
 // @URL <GET> /api/users/logout
 // @Access private
 export const logOutUser = asyncHandler(async (req, res) => {
-	res.clearCookie("accessToken");
+	res.clearCookie("accessToken", {
+		httpOnly: true,
+		sameSite: "none",
+		secure: true,
+		path: "/",
+	});
 	res.json({ status: 200, meg: "Logged Out" });
 });
 

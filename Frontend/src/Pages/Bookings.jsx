@@ -26,7 +26,7 @@ function Bookings() {
                 )).data;
                 setBookings(res.bookings);
             } catch(err) {
-                console.log(err);
+                Alert('error', err.response?.data?.message);
             }
             setIsLoading(false);
         }
@@ -71,7 +71,6 @@ function Bookings() {
             }
 
         } catch(err) {
-            console.log(err);
             Alert('error', err.response?.data?.message);
         }
     }, [])

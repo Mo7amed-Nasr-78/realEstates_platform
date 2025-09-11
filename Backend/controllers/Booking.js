@@ -299,13 +299,13 @@ export const deleteBooking = asyncHandler(
             throw new Error('invalid booking id');
         }
 
-        const booking = await Booking.findOne({ _id: bookingId, $eq: ["$status", "pending"] });
+        const booking = await Booking.findOne({ _id: bookingId, status: 'pending' });
         if (!booking) {
             res.status(400);
             throw new Error('the booking isn\'t found');
         }
 
-        await Booking.deleteOne({
+        const deletedBooking = await Booking.findOneAndDelete({
             _id: booking._id,
         });
 

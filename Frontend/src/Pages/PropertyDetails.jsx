@@ -7,7 +7,6 @@ import Loader from "../components/Loader";
 import Carousel from "../components/Carousel";
 import axios from 'axios';
 import {
-    PiArrowUpRight,
     PiStarFill,
     PiStar,
     PiPaperPlaneTilt,
@@ -21,12 +20,14 @@ import {
     PiClock,
     PiArrowUp,
     PiArrowDown,
-    PiCaretDown
+    PiCaretDown,
+    PiCalendarLight
 } from 'react-icons/pi';
 import Modal from "../components/Modal";
 import Dropdown from "../components/Dropdown";
 import Alert from '../components/Alert';
 import { timesList, purposeList } from "../../Data/Data";
+import Calendar from "../components/Calendar";
 
 function PropertyDetails() {
 
@@ -53,6 +54,7 @@ function PropertyDetails() {
     const [ readMore, setReadMore ] = useState(false);
     const [ scrolled, setScrolled ] = useState(0);
     const [ openModal, setOpenModal ] = useState(false);
+    const [ openCalendar, setOpenCalendar ] = useState(false);
     const [ booking, setBooking ] = useState(bookingData);
 
     // Component Refs
@@ -72,7 +74,12 @@ function PropertyDetails() {
                 )).data;
                 setProperty(res.property);
             } catch (err) {
-                console.log(err)
+                Alert('error', err.response?.data?.message);
+                if (err.response.status === 404) {
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 2000)
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -187,13 +194,14 @@ function PropertyDetails() {
                 )).data;
                 Alert('success', res.message);
             } catch (err) {
-                console.log(err);
                 if (err.status === 401) {
+                    Alert('warning', 'please signin first');
                     setTimeout(() => {
                         navigate('/signin')
                     }, 2000)
+                } else {
+                    Alert('error', err.response?.data?.message);
                 };
-                Alert('error', err.response?.data?.message);
             } finally {
                 setOpenModal(!openModal);
                 setBooking(bookingData);
@@ -213,7 +221,14 @@ function PropertyDetails() {
 			)).data;
 			navigate(`/messages/${res.chat._id}`)
 		} catch (err) {
-			console.log(err);
+            if (err.status === 401) {
+                Alert('warning', 'please signin first');
+                setTimeout(() => {
+                    navigate('/signin')
+                }, 2000)
+            } else {
+                Alert('error', err.response?.data?.message);
+            };
 		}
 	}, [id])
 
@@ -517,10 +532,10 @@ function PropertyDetails() {
                                 <div className="grid grid-cols-12 gap-3 mb-5">
                                     {
                                         Object.keys(booking).map((feild, idx) => {
-                                            return ( ![3,4].includes(idx) &&
-                                                <div key={idx} className={`${![2,5].includes(idx)? 'col-span-12': 'col-span-12 sm:col-span-6'} flex flex-col gap-1`}>
+                                            return ( ![3,4,5].includes(idx) &&
+                                                <div key={idx} className={`${![2].includes(idx)? 'col-span-12': 'col-span-12 sm:col-span-6'} flex flex-col gap-1`}>
                                                     <label htmlFor={feild} className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ feild }:</label>
-                                                    <input type="text" onChange={(event) => { setBooking({ ...booking, [feild]: event.target.value }) }} value={booking[feild]} name={feild} id={feild} placeholder={'Enter Your ' + feild} className="w-full h-12 border border-(--secondary-text) rounded-2xl px-3 text-lg text-(--primary-text) placeholder:text-base placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none"/>
+                                                    <input type="text" onChange={(event) => { setBooking({ ...booking, [feild]: event.target.value }) }} value={booking[feild]} name={feild} id={feild} autoComplete="off" placeholder={'Enter Your ' + feild} className="w-full h-12 border border-(--secondary-text) rounded-2xl px-3 text-base text-(--primary-text) placeholder:text-base placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none"/>
                                                 </div>
                                             ) || ( [3,4].includes(idx) &&
                                                 <div key={idx} className="col-span-12 sm:col-span-6 flex flex-col gap-1">
@@ -535,6 +550,15 @@ function PropertyDetails() {
                                                             <PiCaretDown className="text-2xl text-(--primary-text)"/>
                                                         </div>
                                                     </Dropdown>
+                                                </div>
+                                            ) || ( [5].includes(idx) && 
+                                                <div key={idx} className={`col-span-12 sm:col-span-6 flex flex-col gap-1`}>
+                                                    <label htmlFor={feild} className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ feild }:</label>
+                                                    <div className="relative flex items-center justify-center border border-(--secondary-text) rounded-2xl px-3">
+                                                        { openCalendar? <Calendar onApply={(value) => setBooking({ ...booking, date: value })} onCancel={(value) => setOpenCalendar(value) }/> : null }
+                                                        <span onClick={() => setOpenCalendar(!openCalendar)} className={`${ booking[feild]? 'text-(--primary-text)' : 'text-(--secondary-text) font-light'  } w-full h-12 flex items-center text-base`}>{ booking[feild]? booking[feild] : 'DD/MM/YY'  }</span>
+                                                        <PiCalendarLight onClick={() => setOpenCalendar(!openCalendar)} className="text-2xl text-(--primary-text) hover:text-(--primary-color) cursor-pointer" />
+                                                    </div>
                                                 </div>
                                             )
                                         })

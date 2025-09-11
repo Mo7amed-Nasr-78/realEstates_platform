@@ -25,15 +25,15 @@ function Stats() {
 
         const getOwnProperies = async () => {
             try {
-                const res = (await axios.get(
+                const { data } = await axios.get(
                     `${url}/api/property/get`,
                     {
                         withCredentials: true,
                     }
-                )).data;
-                setProperties(res.properties);
+                );
+                if (data.properties.length > 0) setProperties(data.properties);
             } catch (err) {
-                console.log(err);
+                Alert('error', err.response?.data?.message);
             }
         }
         if (!properties) {
@@ -55,7 +55,7 @@ function Stats() {
             Alert('success', res.message);
             setProperties(properties.filter((i) => i._id !== property._id));
         } catch (err) {
-            console.log(err);
+            Alert('error', err.response?.data?.message);
             setProperties(currentProperties);
         } finally {
             setProperty(null);

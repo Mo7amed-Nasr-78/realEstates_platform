@@ -66,7 +66,7 @@ export const getCertainProperty = asyncHandler(
 			
 		const property = await Property.findOne({ _id: propertyId }).populate('user');
 		if (!property) {
-			res.status(400);
+			res.status(404);
 			throw new Error('property is\'t found');
 		}
 
