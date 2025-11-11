@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useProps } from "../../components/PropsContext";
 import Alert from "../../components/Alert";
 import axios from "axios";
-import Loader from "../../components/Loader";
 
 
 function Otp() {
@@ -11,16 +10,22 @@ function Otp() {
     const location = useLocation();
     const inputsRef = useRef([]);
     const navigate = useNavigate();
-    const { user, url } = useProps();
-
+    const { user, url, isLoading } = useProps();
     const [ otp, setOtp ] = useState(["","","","","",""]);
-    const [ isLoading, setIsLoading ] = useState(false);
-
+    
+    // token extracting
+    const [ searchParams ] = useSearchParams();
+    const hasToken = searchParams.has('e');
+    const token = searchParams.get('e');
 
     useEffect(() => {
 		if (user) {
-			navigate("/");
+			navigate('/');
 		}
+
+        if (!hasToken || !token) {
+            navigate('/');
+        }
 	}, [user]);
 
     useEffect(() => {
@@ -32,8 +37,6 @@ function Otp() {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('e');
         const enteredOtp = [...otp].join('');
         
         if (!enteredOtp) {
@@ -41,15 +44,13 @@ function Otp() {
             return;
         }
 
-        setIsLoading(true);
         try {
             const res = (await axios.post(`${url}/api/users/otp/verify`, { otp: enteredOtp, token })).data;
+            console.log(res);
             navigate(res.redirectUrl, { state: { message: res.message } })
         } catch (err) {
             Alert('error', err.response?.data?.message);
-        } finally {
-            setIsLoading(false);
-        }
+        } 
     }
 
     const handleChange = (e, index) => {
@@ -79,8 +80,8 @@ function Otp() {
     if (isLoading) return <Loader />
 
     return (
-        <section className="relative w-full min-h-screen lg:h-screen flex items-center justify-between bg-(--bg-color)">
-            <div className="w-full lg:w-[50%] h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+        <section className="relative w-full min-h-screen lg:h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
+            <div className="w-full md:w-3/4 lg:w-1/2 h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
                 <h1 className="text-4xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-center">OTP</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans text-base md:text-lg font-light text-(--secondary-text) text-center mb-6 capitalize">Enter the OTP sent to your email/phone to verify and secure your account.</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">
@@ -114,7 +115,6 @@ function Otp() {
                 </div>
             </div>
             <div className="hidden lg:block lg:w-[50%] h-full bg-[url(/public4.png)] rounded-tl-4xl rounded-bl-4xl shadow-(--primary-text)"></div>
-            { isLoading? <Loader />: null }
         </section>
     )
 }

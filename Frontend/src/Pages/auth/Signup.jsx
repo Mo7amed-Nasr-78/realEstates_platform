@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../../components/Loader";
 import { useProps } from "../../components/PropsContext";
@@ -9,25 +9,30 @@ import { FacebookProvider, Login } from 'react-facebook';
 function Signup() {
     
     const navigate = useNavigate();
+    const { url, user, isLoading } = useProps();
+
+    // role extracting
     const [ searchParams ] = useSearchParams();
-    const { url, user } = useProps();
-    const [ isLoading, setIsLoading ] = useState(false);
+    const role = searchParams.get("role");
+    const hasRole = searchParams.has("role");
 
     useEffect(() => {
 		if (user) {
 			navigate("/");
 		}
+
+        if (!hasRole || !role) {
+            navigate("/role");
+        }
 	}, [user]);
 
-    const handleSubmit = useCallback(async (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         event.target.lastChild.disabled = true;
         
         const name = event.target['name'].value.trim();
         const email = event.target['email'].value.trim();
         const password = event.target['password'].value.trim();
-        
-        const params = new URLSearchParams(window.location.search);
 
         if (!name || !email || !password) {
             Alert('warning', 'please enter all fields first');
@@ -43,20 +48,17 @@ function Signup() {
             return false;
         }
 
-        setIsLoading(true);
         try {
-            const res = (await axios.post(`${url}/api/users/signup/?role=${params.get("role")}`, { name, email, password })).data;
+            const res = (await axios.post(`${url}/api/users/signup/?role=${searchParams.get("role")}`, { name, email, password })).data;
             navigate(res.redirectUrl, { state: { message: res.message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
-        } finally {
-            setIsLoading(false);
         }
         event.target.lastChild.disabled = false;
         event.target.reset();
-    }, [])
+    };
 
-    const handleFacebookLogIn = useCallback(async (response) => {
+    const handleFacebookLogIn = async (response) => {
         if (!response.authResponse) return;
         try {
             await axios.post(
@@ -69,13 +71,13 @@ function Signup() {
         } catch (err) {
             console.log(err);
         }
-    }, []);
+    };
 
     if (isLoading) return <Loader />
 
     return (
         <section className="w-full min-h-screen lg:h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
-            <div className="w-ful lg:w-[50%] h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-16 xxl:px-20 py-10 lg:py-0">
+            <div className="w-ful md:w-3/4 lg:w-1/2 h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-16 xxl:px-20 py-10 lg:py-0">
                 <h1 className="text-5xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-start">sign up</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans md:text-lg font-light text-(--secondary-text) mb-6 capitalize">Join us! sign up for exclusive real estate updates, listings, and expert insights</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">

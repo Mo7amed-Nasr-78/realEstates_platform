@@ -26,7 +26,7 @@ function Role() {
 
     return (
         <section className="w-full h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
-            <div className="md:w-[65%] lg:w-[50%] h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+            <div className="md:w-3/4 lg:w-1/2 h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
                 <h1 className="text-4xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-center">what's your role</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans text-base md:text-lg font-light text-(--secondary-text) text-center mb-6 capitalize">choose your account as properties agent or properties finder</h3>
                 <form onSubmit={handleSubmit} className="w-full mb-4">

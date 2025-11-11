@@ -91,7 +91,6 @@ function App() {
 
 	useEffect(() => {
 		const checkUserSession = async () => {
-			setIsLoading(true);
 			try {
 				const res = (
 					await axios.get(`${url}/api/users/current`, {
@@ -104,8 +103,6 @@ function App() {
 				if (err.status !== 401) {
 					Alert('error', err.response?.data?.message);
 				}
-			} finally {
-				setIsLoading(false)
 			}
 		};
 		checkUserSession();
