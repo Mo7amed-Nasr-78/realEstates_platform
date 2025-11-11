@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useProps } from "../../components/PropsContext";
 import Alert from "../../components/Alert";
@@ -10,8 +10,7 @@ import { FacebookProvider, Login } from 'react-facebook';
 function Signin() {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { url, user, setUser } = useProps();
-	const [ isLoading, setIsLoading ] = useState(false);
+	const { url, user, setUser, isLoading } = useProps();
 
 	useEffect(() => {
 		if (user) {
@@ -50,7 +49,6 @@ function Signin() {
 			return false;
 		}
 
-		setIsLoading(true);
 		try {
 			(
 				await axios.post(
@@ -64,15 +62,13 @@ function Signin() {
 			navigate('/');
 		} catch (err) {
 			Alert('error', err.response?.data?.message);
-		} finally {
-            setIsLoading(false);
-        }
+		}
 
 		event.target.lastChild.disabled = false;
 		event.target.reset();
 	};
 
-	const currentAPI = useCallback(async () => {
+	const currentAPI = async () => {
 		try {
 			const res = (await axios.get(
 				`${url}/api/users/current`,
@@ -82,9 +78,9 @@ function Signin() {
 		} catch(err) {
 			console.log(err);
 		}
-	}, []);
+	};
 
-	const handleFacebookLogIn = useCallback(async (response) => {
+	const handleFacebookLogIn = async (response) => {
 		if (!response.authResponse) return;
         try {
             await axios.post(
@@ -97,13 +93,13 @@ function Signin() {
         } catch (err) {
             console.log(err);
         } 
-    }, []);
+    };
 
 	if (isLoading) return <Loader />
 
 	return (
-		<section className="w-full h-screen flex items-center justify-between bg-(--bg-color)">
-			<div className="w-full lg:w-[50%] h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+		<section className="w-full h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
+			<div className="w-full md:w-3/4 lg:w-1/2 h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-20">
 				<h1 className="text-5xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-start">sign in</h1>
 				<h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans md:text-lg font-light text-(--secondary-text) mb-6 capitalize">
 					Welcome back! Sign in to continue your journey
