@@ -156,4 +156,31 @@ export const facebookAuth = asyncHandler(
 
 		res.redirect(url)
 	}
+);
+
+export const refresh = asyncHandler(
+	async (req, res) => {
+		const refreshToken = req.cookies["refreshToken"];
+		if (!refreshToken) {
+			res.status(401);
+			throw new Error('Unauthorized');
+		}
+		const payload = jwt.verify(refreshToken,process.env.ACCESS_TOKEN_SECRET);
+		const { id } = payload;
+		
+		const user = await User.findOne({ _id: id });
+
+		const newAccessToken = jwt.sign(
+			{
+				id: user.id,
+				email: user.email,
+				role: user.role
+			},
+			process.env.ACCESS_TOKEN_SECRET
+		);
+
+		res.status(201).json({
+			accessToken: newAccessToken,
+		});
+	}
 )

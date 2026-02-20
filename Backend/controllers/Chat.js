@@ -220,7 +220,7 @@ export const getConversation = asyncHandler(async (req, res) => {
 	const chat = await Chat.findById(chatId)
 	.populate({
 		path: 'participants',
-		select: 'name picture isActive lastSeen'
+		select: '_id name picture isActive lastSeen'
 	});
 
 	const otherUser = chat.participants.find((p) => {
@@ -287,7 +287,6 @@ export const markAllMessagesAsRead = asyncHandler(
 		const senderSocket = usersSet.get(msgs[0].sender.toString());
 		if (senderSocket) {
 			io.to(senderSocket).emit('chat:realAll', msgs);
-			// console.log('All messages have been marked as read');
 		}
 
 		// return true;
