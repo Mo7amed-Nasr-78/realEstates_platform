@@ -1,34 +1,32 @@
 import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 import {
     PiMagnifyingGlass,
     PiSliders
 } from 'react-icons/pi';
-import { useProps } from "./PropsContext";
-import axios from "axios";
-import { Link, useParams } from "react-router-dom";
 
 function ChatList({ status, newMsg, newChat }) {
 
     const { id } = useParams();
-    const { url } = useProps();
     const [ conversations, setConversations ] = useState([]);
     const [ search, setSearch ] = useState('');
+
 
     useEffect(() => {
             
         const getConversations = async () => {
             try {
-                const res = (await axios.get(
-                    `${url}/api/chat/conversations`,
+                const { data: { conversations } } = await api.get(
+                    `/api/chat/conversations`,
                     {
-                        withCredentials: true,
                         params: {
                             name: search,
                             order: 'latest'
                         }
                     }
-                )).data;
-                setConversations(res.conversations);
+                );
+                setConversations(conversations);
             } catch (err) {
                 console.log(err);
             }

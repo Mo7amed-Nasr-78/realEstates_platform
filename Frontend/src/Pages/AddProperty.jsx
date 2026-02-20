@@ -1,12 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useProps } from "../components/PropsContext";
-import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
-import Header from "../components/Header/Header";
-import Footer from "../components/Footer";
-import Alert from "../components/Alert";
-import Dropdown from "../components/Dropdown";
-import {facilities } from "../../Data/Data";
+import { useProps } from "../components/PropsProvider";
+import { useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 import { 
     PiPlus,
     PiUploadSimple,
@@ -14,11 +9,22 @@ import {
     PiXBold,
     PiCaretDown,
 } from 'react-icons/pi';
+// Components
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Alert from "../components/Alert";
+import Dropdown from "../components/Dropdown";
+import {facilities } from "../../Data/Data";
 
 
 function AddProperty() {
 
-    const { user, url } = useProps();
+    const {
+        user,
+        isLoading,
+        setIsLoading
+    } 
+    = useProps();
     const navigate = useNavigate();
 
     const infoObject = { name: '', address: '', rooms: '', bathrooms: '', garages: '', yearBuilt: '', area: '', category: '', forSale: '', forRent: '', description: '' }
@@ -29,7 +35,6 @@ function AddProperty() {
     const inputOfImgs = useRef([]);
     
     // useState hooks 
-    const [ isLoading, setIsLoading ] = useState(false);
     const [ imgs, setImgs ] = useState(imgsObject);
     const [ info, setInfo ] = useState(infoObject);
     const [ features, setFeatures ] = useState([{ title: '', description: '' }]);
@@ -74,7 +79,7 @@ function AddProperty() {
         event.preventDefault();
 
         const addItemAlert = () => {
-            Alert('warning', `you can't add more than 10 ${type}s`)
+            Alert('warning', `You can't add more than 10 ${type}s`)
         } 
 
         switch(type) {
@@ -145,7 +150,7 @@ function AddProperty() {
         // Check images existing
         if (!Object.values(imgs).some((i) => i !== null)) {
             return (
-                Alert('warning', 'please upload at least 1 image')
+                Alert('warning', 'Please upload at least 1 image')
             )
         }
 
@@ -153,7 +158,7 @@ function AddProperty() {
         for (const i of Object.values(info)) {
             if (!i) {
                 return (
-                    Alert('warning', 'please enter all property infromation')
+                    Alert('warning', 'Please enter all property infromation')
                 )
             }
         }
@@ -161,21 +166,21 @@ function AddProperty() {
         // Check features List
         if (features.length === 1 && !features[0].title || !features[0].description) {
             return (
-                Alert('warning', 'please enter at least 1 feature')
+                Alert('warning', 'Please enter at least 1 feature')
             )
         }
 
         // Check insights List
         if (insights.length === 1 && !insights[0].title || !insights[0].description) {
             return (
-                Alert('warning', 'please enter at least 1 insight')
+                Alert('warning', 'Please enter at least 1 insight')
             )
         }
 
         // Check financials List
         if (financials.length === 1 && !financials[0].title || !financials[0].description) {
             return (
-                Alert('warning', 'please enter at least 1 financial')
+                Alert('warning', 'Please enter at least 1 financial')
             )
         }
 
@@ -195,7 +200,9 @@ function AddProperty() {
 
         setIsLoading(true);
         try {
-            const res = (await axios.post(`${url}/api/property/upload`, formData, { withCredentials: true })).data;
+            const res = (await api.post(`/api/property/upload`, 
+                formData,
+            )).data;
             Alert('success', res.message);
         } catch (err) {
             Alert('error', err.response?.data?.message);
@@ -209,7 +216,6 @@ function AddProperty() {
             setFinancials([{ title: '', description: '' }]);
         }
     }
-
 
     useEffect(() => {
         return () => {
@@ -294,7 +300,7 @@ function AddProperty() {
                             <h3 className="font-Plus-Jakarta-Sans font-medium text-2xl text-(--primary-text) capitalize mb-4">About Property</h3>
                             <div className="flex flex-col gap-6 mb-8">
 
-                                <section className="w-full grid grid-cols-12 gap-4">
+                                <div className="w-full grid grid-cols-12 gap-4">
                                     <div className="col-span-12 flex items-center gap-2">
                                         <span className="w-[3px] h-7 rounded-full bg-(--primary-color)"></span>
                                         <h3 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">property information</h3>
@@ -305,19 +311,19 @@ function AddProperty() {
                                                 ([0, 1].includes(idx) &&
                                                     <div className='col-span-12 sm:col-span-6' key={'info-' + idx}>
                                                         <label htmlFor={infoField} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize mb-2">{ infoField }</label>
-                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'property ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'property ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
                                                     </div>
                                                 ) ||
                                                 ([2,3,4,5,6].includes(idx) && 
                                                     <div className='col-span-12 sm:col-span-6 xxl:col-span-4' key={'info-' + idx}>
                                                         <label htmlFor={infoField} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize mb-2">{ infoField }</label>
-                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'property ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'property ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
                                                     </div>
                                                 ) ||
                                                 ([8,9].includes(idx) && 
                                                     <div className='col-span-12 sm:col-span-6 xxl:col-span-4' key={'info-' + idx}>
                                                         <label htmlFor={infoField} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize mb-2">Price</label>
-                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'price ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                        <input type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField} id={infoField} placeholder={'price ' + infoField} className="font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
                                                     </div>
                                                 ) ||
                                                 (
@@ -330,7 +336,7 @@ function AddProperty() {
                                                                 classes={'w-full'}
                                                                 onSelect={handleSelect}
                                                             >
-                                                                <div className={`${!selected? 'text-(--secondary-text)/75': 'text-(--primary-text)'} border-(--secondary-text) w-full h-12 flex items-center justify-between text-sm border-1 rounded-2xl px-4 cursor-pointer`}>
+                                                                <div className={`${!selected? 'text-(--secondary-text)/75': 'text-(--primary-text)'} border-(--secondary-text) w-full h-12 flex items-center justify-between text-sm border-b px-4 cursor-pointer`}>
                                                                     <span className="font-Plus-Jakarta-Sans font-light capitalize">
                                                                         { !selected? 'choose category': selected }
                                                                     </span>
@@ -343,15 +349,15 @@ function AddProperty() {
                                                 (idx === 10 && 
                                                     <div className='col-span-12' key={idx}>
                                                         <label htmlFor={infoField} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize mb-2">{ infoField }</label>
-                                                        <textarea type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField}  id={infoField} placeholder={'property ' + infoField} className="appearance-none font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) py-3 px-4 focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                        <textarea type="text" onChange={(event) => changeInfo(event)} value={info[infoField]} name={infoField}  id={infoField} placeholder={'property ' + infoField} className="appearance-none font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-light placeholder:text-(--secondary-text)/75 capitalize w-full h-12 border-b border-(--secondary-text) py-3 px-4 focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
                                                     </div>
                                                 )
                                             )
                                         })
                                     }
-                                </section>
+                                </div>
 
-                                <section className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4">
                                     <div className="col-span-12 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <span className="w-[3px] h-7 rounded-full bg-(--primary-color)"></span>
@@ -369,9 +375,9 @@ function AddProperty() {
                                         features.map((feature, idx) => {
                                             return (
                                                 <li key={'feature-' + idx} className="relative w-full flex flex-col gap-3">
-                                                    <input type="text" value={feature.title} onChange={(event) => changeItem(event, 'feature', 'title', idx)} id={'feature-' + idx} placeholder='feature title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <input type="text" value={feature.description} onChange={(event) => changeItem(event, 'feature', 'description', idx)} id={'feature-' + idx} placeholder='feature description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <div onClick={(event) => removeItem(event, 'feature', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[rgb(222,53,110,.2)] hover:bg-[#DE350B]  rounded-lg cursor-pointer">
+                                                    <input type="text" value={feature.title} onChange={(event) => changeItem(event, 'feature', 'title', idx)} id={'feature-' + idx} placeholder='feature title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <input type="text" value={feature.description} onChange={(event) => changeItem(event, 'feature', 'description', idx)} id={'feature-' + idx} placeholder='feature description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <div onClick={(event) => removeItem(event, 'feature', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[#DE350B]/10 hover:bg-[#DE350B] rounded-sm cursor-pointer">
                                                         <PiXBold />
                                                     </div>
                                                 </li>
@@ -379,9 +385,9 @@ function AddProperty() {
                                         })
                                     }
                                     </ul>
-                                </section>
+                                </div>
 
-                                <section className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4">
                                     <div className="col-span-12 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <span className="w-[3px] h-7 rounded-full bg-(--primary-color)"></span>
@@ -399,9 +405,9 @@ function AddProperty() {
                                         insights.map((insight, idx) => {
                                             return (
                                                 <li key={'insight-' + idx} className="relative w-full flex flex-col gap-3">
-                                                    <input type="text" value={insight.title} onChange={(event) => changeItem(event, 'insight', 'title', idx)} id={'insight-' + idx} placeholder='insight title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <input type="text" value={insight.description} onChange={(event) => changeItem(event, 'insight', 'description', idx)} id={'insight-' + idx} placeholder='insight description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <div onClick={(event) => removeItem(event, 'insight', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[rgb(222,53,110,.2)] hover:bg-[#DE350B]  rounded-lg cursor-pointer">
+                                                    <input type="text" value={insight.title} onChange={(event) => changeItem(event, 'insight', 'title', idx)} id={'insight-' + idx} placeholder='insight title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <input type="text" value={insight.description} onChange={(event) => changeItem(event, 'insight', 'description', idx)} id={'insight-' + idx} placeholder='insight description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <div onClick={(event) => removeItem(event, 'insight', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[#DE350B]/10 hover:bg-[#DE350B] rounded-sm cursor-pointer">
                                                         <PiXBold />
                                                     </div>
                                                 </li>
@@ -409,9 +415,9 @@ function AddProperty() {
                                         })
                                     }
                                     </ul>
-                                </section>
+                                </div>
 
-                                <section className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4">
                                     <div className="col-span-12 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <span className="w-[3px] h-7 rounded-full bg-(--primary-color)"></span>
@@ -429,9 +435,9 @@ function AddProperty() {
                                         financials.map((financial, idx) => {
                                             return (
                                                 <li key={'financial-' + idx} className="relative w-full flex flex-col gap-3">
-                                                    <input type="text" value={financial.title} onChange={(event) => changeItem(event, 'financial', 'title', idx)} id={'financial-' + idx} placeholder='insight title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <input type="text" value={financial.description} onChange={(event) => changeItem(event, 'financial', 'description', idx)} id={'financial-' + idx} placeholder='insight description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
-                                                    <div onClick={(event) => removeItem(event, 'financial', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[rgb(222,53,110,.2)] hover:bg-[#DE350B]  rounded-lg cursor-pointer">
+                                                    <input type="text" value={financial.title} onChange={(event) => changeItem(event, 'financial', 'title', idx)} id={'financial-' + idx} placeholder='insight title' className="w-1/2 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <input type="text" value={financial.description} onChange={(event) => changeItem(event, 'financial', 'description', idx)} id={'financial-' + idx} placeholder='insight description' className="col-span-12 font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text)/75 capitalize h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]"/>
+                                                    <div onClick={(event) => removeItem(event, 'financial', idx)} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[#DE350B]/10 hover:bg-[#DE350B] rounded-sm cursor-pointer">
                                                         <PiXBold />
                                                     </div>
                                                 </li>
@@ -439,17 +445,15 @@ function AddProperty() {
                                         })
                                     }
                                     </ul>
-                                </section>
+                                </div>
                                 
                             </div>
                             <div className="w-full flex justify-end">
-                                <button type="submit" disabled={isLoading} className={`${isLoading? '!bg-(--primary-color)/50 h-13': ''} mainBtn`}>
-                                    <div className="w-full h-full flex items-center justify-center gap-3">
-                                        <div className={`${isLoading? 'block': 'hidden'} relative h-4 w-4 animate-spin`}>
-                                            <div className="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-(--primary-text) border-t-transparent"></div>
-                                        </div>
-                                        <span className={`${isLoading? 'hidden' : 'block'}`}>upload</span>
+                                <button type="submit" disabled={isLoading} className={`${isLoading? '!bg-transparent': ''} mainBtn h-13 flex items-center justify-center`}>
+                                    <div className={`${isLoading? 'block': 'hidden'} relative h-5 w-5 animate-spin`}>
+                                        <div className="absolute top-0 left-0 w-full h-full rounded-full border-2 border-(--primary-color) border-t-transparent"></div>
                                     </div>
+                                    <span className={`${isLoading? 'hidden' : 'block'}`}>upload</span>
                                 </button>
                             </div>
                         </div>

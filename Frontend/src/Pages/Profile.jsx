@@ -1,7 +1,5 @@
-import { useCallback, useState } from "react";
-import Header from "../components/Header/Header";
-import Footer from "../components/Footer";
-import { useProps } from "../components/PropsContext";
+import { useState } from "react";
+import { useProps } from "../components/PropsProvider";
 import {
 	PiFacebookLogoLight,
 	PiInstagramLogoLight,
@@ -13,19 +11,37 @@ import {
 	PiGraduationCap,
 	PiFunnel
 } from "react-icons/pi";
-import Dropdown from "../components/Dropdown";
 import { languages } from "../../Data/Data";
-import Alert from "../components/Alert";
-import axios from "axios";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
+// Components
+import Dropdown from "../components/Dropdown";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import Modal from "../components/Modal";
+import Alert from "../components/Alert";
+import BookingCard from "../components/BookingCard";
 
 function Profile() {
 
-	const info = { name: '', phone: '', address: '', age: '', gender: '', jobTitle: '', aboutMe: '' }
+	const info = { 
+		name: '', 
+		phone: '', 
+		address: '', 
+		age: '', 
+		gender: '', 
+		jobTitle: '', 
+		aboutMe: '' 
+	};
 
-	const { url, user, setUser, isLoading } = useProps();
+	const { 
+		user, 
+		setUser, 
+		isLoading,
+		setIsLoading
+	} 
+	= useProps();
 	const navigate = useNavigate();
 
 	// Property form states
@@ -37,13 +53,11 @@ function Profile() {
 	const [ certifications, setCertifications ] = useState(user.certifications);
 	const [ languageSearch, setLanguageSearch ] = useState('');
 	const [ selectedLanguages, setSelectedLanguages ] = useState([]);
-	const [ openModal, setOpenModal ] = useState(false);
-	const [ spin, setSpin ] = useState(false);
+	// const [ openModal, setOpenModal ] = useState(false);
 
 	// Profile nav states
 	const [ profileTab, setProfileTab ] = useState('overview');
 	const [ bookings, setBookings ] = useState([]);
-	const [ deleteBookingId, setDeleteBookingId ] = useState(null);
 
 	const changeCertification = (event, index) => {
 		const newCertifications = [...certifications];
@@ -82,37 +96,33 @@ function Profile() {
 		formData.set('languages', JSON.stringify(selectedLanguages));
 		formData.set('certifications', JSON.stringify(certifications));
 
-		setSpin(true);
 		try {
-			const res = (await axios.post(
-				`${url}/api/users/update`,
+			setIsLoading(true);
+			const { data: { user, message } } = await api.post(
+				`/api/users/update`,
 				formData,
-				{ withCredentials: true }
-			)).data;
-			Alert('success', res.message);
-			setUser(res.user);
+			);
+			Alert('success', message);
+			setUser(user);
 		} catch (err) {
 			Alert('warning', err.response?.data?.message);
 			if (err.response.status === 404) {
 				navigate('/');
 			}
 		} finally {
-			setSpin(false);
+			setIsLoading(false);
 		}
 
 	}
 
 	useEffect(() => {
-
 		const getBookings = async () => {
 			try {
-				const res = (await axios.get(
-					`${url}/api/booking/get`,
-					{
-						withCredentials: true
-					}
-				)).data;
-				setBookings(res.bookings);
+				const { data: { bookings } } = await api.get(
+					`/api/booking/get`,
+				);
+
+				setBookings(bookings);
 			} catch (err) {
 				console.log(err);
 			}
@@ -121,26 +131,7 @@ function Profile() {
 		if (profileTab.includes('bookings')) {
 			getBookings();
 		}
-
 	}, [profileTab]);
-
-	const deleteBooking  = useCallback(async () => {
-		try {
-			const res = (await axios.delete(
-				`${url}/api/booking/delete/${deleteBookingId._id}`,
-				{
-					withCredentials: true
-				}
-			)).data;
-			setBookings(bookings.filter((booking) => booking._id !== deleteBookingId._id));
-			Alert('success', res.message);
-		} catch (err) {
-			console.log(err);
-			Alert('error', err.response?.data?.message);
-		}
-	}, [deleteBookingId]);
-
-	if (isLoading) return <Loader />;
 
 	return (
 		<main>
@@ -232,7 +223,7 @@ function Profile() {
 						</div>
 					</div>
 
-					{/* Edit Mode ( off ) */}
+					{/* Profile preview */}
 					<div className={!editProfile? 'h-full col-span-12 lg:col-span-8': 'hidden'}>
 						<div className="w-full flex flex-col rounded-3xl border border-(--secondary-text) p-4 sm:p-6">
 							<nav className="w-full border-b border-(--secondary-text) mb-5">
@@ -255,7 +246,7 @@ function Profile() {
 										about me:
 									</h2>
 									{user.aboutMe ? 
-										<pre className="w-full text-wrap font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text)">
+										<pre className="w-full text-wrap font-Plus-Jakarta-Sans font-extralight text-lg tracking-wide text-(--secondary-text)">
 											{user.aboutMe}
 										</pre>
 									:
@@ -345,44 +336,7 @@ function Profile() {
 									{
 										bookings.length > 0?
 											bookings.map((booking, idx) => {
-												return (
-													<div key={idx} className="col-span-12 sm:col-span-6 lg:col-span-4">
-														<img src={booking.property.propertyImages[0]} alt="property image" className="w-full h-42 object-cover rounded-2xl mb-1" />
-														<div className="w-full flex items-center justify-between mb-2">
-															<h5 className="w-full font-Plus-Jakarta-Sans font-normal text-lg text-(--primary-text) line-clamp-1 capitalize">{ booking.property.name }</h5>
-															<Link to={`/profile/${booking.agent._id}`}>
-																<span className="font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-color) underline capitalize">agency</span>
-															</Link>
-														</div>
-														<ul className="w-full flex flex-col gap-1 mb-3">
-															<li className="flex items-center justify-between">
-																<h4 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">agent:</h4>
-																<h5 className="font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-text) capitalize">{ booking.agent.name }</h5>
-															</li>
-															<li className="flex items-center justify-between">
-																<h4 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">date:</h4>
-																<h5 className="font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-text) capitalize">{ booking.date }</h5>
-															</li>
-															<li className="flex items-center justify-between">
-																<h4 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">time:</h4>
-																<h5 className="font-Plus-Jakarta-Sans font-normal text-sm text-(--primary-text) capitalize">{ booking.time }</h5>
-															</li>
-															<li className="flex items-center justify-between">
-																<h4 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">status:</h4>
-																<h5 className={`${booking.status.includes('pending')? 'text-[#FFC400]': booking.status.includes('accepted')? 'text-[#57D9A3]' : 'text-[#2684FF]'} font-Plus-Jakarta-Sans font-normal text-sm capitalize`}>{ booking.status }</h5>
-															</li>
-														</ul>
-
-														<button onClick={
-															() => {
-																setOpenModal((i) => !i);
-																setDeleteBookingId(booking);
-															}
-															} className={`${!booking.status.includes('pending')? 'hidden': 'block'} font-Plus-Jakarta-Sans text-sm capitalize font-normal text-[#CC4444] border-[#CC4444] cursor-pointer underline`}>
-															cancel booking
-														</button>
-													</div>
-												)
+												return <BookingCard key={idx} booking={booking} onDelete={(bookingId) => setBookings(bookings.filter((i) => i._id !== bookingId))} />
 											})
 										:
 											<div className="col-span-12 w-full h-[50vh] flex flex-col items-center justify-center">
@@ -417,8 +371,8 @@ function Profile() {
 										return ( idx !== 4 &&
 											<div key={idx} className={`${[5,6].includes(idx)? 'col-span-12': 'col-span-12 sm:col-span-6'} flex flex-col items-start gap-1`}>
 												<label htmlFor={field} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">{ field }</label>
-												<input type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
-												<textarea type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'block': 'hidden'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) py-3 px-4 focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+												<input type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+												<textarea type="text" onChange={(event) => { setPersonalInfo({ ...personalInfo, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field} className={`${idx === 6? 'block': 'hidden'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) py-3 px-4 focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 											</div>
 										) || (	idx === 4 &&
 											<div key={idx} className="col-span-12 sm:col-span-6">
@@ -429,7 +383,7 @@ function Profile() {
 												>
 													<div className={`flex flex-col items-start gap-1`}>
 														<label htmlFor={field} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">{ field }</label>
-														<div className={`${!personalInfo.gender? 'text-(--secondary-text)': 'text-(--primary-text)'} font-Plus-Jakarta-Sans font-light text-sm placeholder:font-normal capitalize w-full h-12 flex items-center rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}>
+														<div className={`${!personalInfo.gender? 'text-(--secondary-text)': 'text-(--primary-text)'} font-Plus-Jakarta-Sans font-light text-sm placeholder:font-normal capitalize w-full h-12 flex items-center border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}>
 															{ !personalInfo.gender? 'select your gender': personalInfo.gender }
 														</div>
 													</div>
@@ -461,15 +415,15 @@ function Profile() {
 													<li key={idx} className="relative w-full grid grid-cols-12 gap-4">
 														<div className={`col-span-6 flex flex-col items-start gap-1`}>
 															<label htmlFor={'certificate' + idx} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">university's name</label>
-															<input type="text" onChange={(event) => { changeCertification(event, idx) } } value={certification.name} name="name" id={'certificate-' + idx} placeholder={'enter university\'s name'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+															<input type="text" onChange={(event) => { changeCertification(event, idx) } } value={certification.name} name="name" id={'certificate-' + idx} placeholder={'enter university\'s name'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)] :border-2`}/>
 														</div>
 														<div className={`col-span-6 flex flex-col items-start gap-1`}>
 															<label htmlFor={'certificate' + idx} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">university's department</label>
-															<input type="text" onChange={(event) => { changeCertification(event, idx) }} value={certification.department} name="department" id={'certificate-' + idx} placeholder={'enter university\'s department'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+															<input type="text" onChange={(event) => { changeCertification(event, idx) }} value={certification.department} name="department" id={'certificate-' + idx} placeholder={'enter university\'s department'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 														</div>
 														<div className={`col-span-12 flex flex-col items-start gap-1`}>
 															<label htmlFor={'certificate' + idx} className="inline-block font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize">description</label>
-															<input type="text" onChange={(event) => { changeCertification(event, idx) }} value={certification.description}  name="description" id={'certificate-' + idx} placeholder={'enter your description'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+															<input type="text" onChange={(event) => { changeCertification(event, idx) }} value={certification.description}  name="description" id={'certificate-' + idx} placeholder={'enter your description'} className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 														</div>
 														<div onClick={(event) => { removeCertification(event, idx) }} className="w-6 h-6 flex items-center justify-center absolute top-0 right-0 text-base duration-300 ease-in-out text-[#DE350B] hover:text-(--primary-text) bg-[rgb(222,53,110,.2)] hover:bg-[#DE350B]  rounded-lg cursor-pointer">
 															<PiXBold />
@@ -502,7 +456,7 @@ function Profile() {
 										return (
 											<div key={idx} className={`col-span-12 flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-5`}>
 												<label htmlFor={field} className="w-1/4 inline-block font-Plus-Jakarta-Sans font-normal text-lg text-(--primary-text) capitalize mb-2">{ field }:</label>
-												<input type="text" onChange={(event) => { setSocials({ ...socials, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field + ' link'} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+												<input type="text" onChange={(event) => { setSocials({ ...socials, [event.target.name]: event.target.value }) }} name={field} id={field} placeholder={'enter your ' + field + ' link'} className={`${idx === 6? 'hidden': 'block'} font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 											</div>
 										)
 									})
@@ -521,7 +475,7 @@ function Profile() {
 									classes={'w-full overflow-y-auto'}
 									onSelect={handleSelect}
 								>
-									<input type="text" onChange={(event) => { setLanguageSearch(event.target.value); }} name='language' id='language' placeholder='enter your language' autoComplete="off" className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-normal placeholder:text-(--secondary-text) capitalize w-full h-12 rounded-2xl border-1 border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
+									<input type="text" onChange={(event) => { setLanguageSearch(event.target.value); }} name='language' id='language' placeholder='enter your language' autoComplete="off" className={`font-Plus-Jakarta-Sans font-light text-sm placeholder:text-sm text-(--primary-text) placeholder:font-extralight placeholder:text-(--secondary-text) capitalize w-full h-12 border-b border-(--secondary-text) px-4 duration-300 ease-in-out focus:outline-none focus:border-(--primary-color) focus:bg-[rgb(144,144,144,0.2)]`}/>
 								</Dropdown>
 								<ul className="w-full flex flex-wrap items-center gap-2 mt-3">
 									{
@@ -538,12 +492,12 @@ function Profile() {
 							</section>
 
 							<div className="w-full flex justify-end">
-								<button onClick={handleSubmit} type="submit" className={`${spin? '!bg-(--primary-color)/50 h-13': ''} mainBtn`}>
+								<button onClick={handleSubmit} type="submit" className={`${isLoading? '!bg-(--primary-color)/50 h-13': ''} mainBtn`}>
 									<div className="w-full h-full flex items-center justify-center gap-3">
-										<div className={`${spin? 'block': 'hidden'} relative h-4 w-4 animate-spin`}>
+										<div className={`${isLoading? 'block': 'hidden'} relative h-4 w-4 animate-spin`}>
 											<div className="absolute top-0 left-0 w-4 h-4 rounded-full border-2 border-(--primary-text) border-t-transparent"></div>
 										</div>
-										<span className={`${spin? 'hidden' : 'block'}`}>save updates</span>
+										<span className={`${isLoading? 'hidden' : 'block'}`}>save updates</span>
 									</div>
 								</button>
 							</div>
@@ -552,28 +506,6 @@ function Profile() {
 				</div>
 			</section>
 			<Footer />
-			{
-				openModal?
-					<Modal>
-						<div className="w-full sm:w-140 rounded-3xl bg-(--bg-color) p-6">
-							<div className="flex flex-col justify-center gap-2 mb-8">
-								<h2 className="font-Playfair font-medium text-3xl text-(--primary-text) capitalize">Confirm cancellation</h2>
-								<h3 className="font-Plus-Jakarta-Sans font-light text-base sm:text-lg text-(--secondary-text) first-letter:capitalize">
-									This booking will be permanently cnacelled. Do you wish to proceed?
-								</h3>
-							</div>
-							<div className="flex items-center justify-end gap-3">
-								<button onClick={() => {
-									deleteBooking();
-									setOpenModal(!openModal);
-									}} className="py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold text-[#CC4444] border-[#CC4444] cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-[#CC4444] hover:text-(--primary-text)">delete</button>
-								<button onClick={() => setOpenModal(!openModal)} className="py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold bg-transparent text-(--primary-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-(--primary-color) hover:text-(--primary-text)">cancel</button>
-							</div>
-						</div>
-					</Modal>
-				:
-					null
-			}
 		</main>
 	);
 }

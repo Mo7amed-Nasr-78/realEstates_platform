@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useProps } from "./PropsContext";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useProps } from "./PropsProvider";
+import { useParams, Link } from "react-router-dom";
 import {
     PiVideoCamera,
     PiSmileyLight,
@@ -10,12 +9,17 @@ import {
     PiChecksLight
 } from 'react-icons/pi'
 import EmojiPicker from 'emoji-picker-react';
+import api from "../../utils/axiosInstance";
 import Alert from "./Alert";
 
 function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
 
     const { id } = useParams();
-    const { url, user } = useProps();
+    const { 
+        user,
+        isLoading,
+        setIsLoading
+    } = useProps();
 
     // Component useState
     const [ msg, setMsg ] = useState('')
@@ -25,22 +29,20 @@ function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
 
     // Component useRefs
     const msgsRef = useRef(null);
-    const sendBtnRef = useRef(null);
 
     useEffect(() => {
         if (!id) return;
 
         const getChatMsgs = async () => {
             try {
-                const { data } = await axios.get(`${url}/api/chat/${id}/messages?markRead=true`, { withCredentials: true });
-                setOtherUser(data.otherUser);
-                setMsgs(data.messages);
+                const { data: { otherUser, messages } } = await api.get(`/api/chat/${id}/messages?markRead=true`);
+                setOtherUser(otherUser);
+                setMsgs(messages);
             } catch (err) {
                 console.log(err);
             }
         }
         getChatMsgs();
-
 
     }, [id])
 
@@ -66,6 +68,7 @@ function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
 
     useEffect(() => {
         if (newMsg) {
+            if (newMsg.chat._id !== id) return;
             setMsgs((prevs) => {
                 return [ ...prevs, newMsg ];
             });
@@ -107,67 +110,58 @@ function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
         }
     }, [unreadMsgs]);
     
-    const sendMessage = useCallback(async (event) => {
+    const sendMessage = async (event) => {
         if (!msg) return;
         if (event.key) {
             if (event.key !== 'Enter') return;
         }
-        sendBtnRef.current.style.disabled = true;
+
+        setIsLoading(true);
         try {
-            const res = (await axios.post(
-                `${url}/api/chat/message/${otherUser._id}`,
+            const { data: { message } } = await api.post(
+                `/api/chat/message/${otherUser._id}`,
                 { 
                     content: msg 
                 },
-                {
-                    withCredentials: true,
-                }
-            )).data;
-            setMsgs((prev) => [ ...prev, res.message ]);
+            );
+
+            setMsgs((prev) => [ ...prev, message ]);
         } catch (err) {
             console.log(err);
         } finally {
             setMsg('');
+            setIsLoading(false)
         }
-        
-        sendBtnRef.current.style.disabled = false;
-    }, [msg]);
+    }
 
-    const handleEmoji = useCallback((event) => {
+    const handleEmoji = (event) => {
         setMsg((i) => i + event.emoji);
-    }, []);
+    }
 
-    const handleDeleteMsg = useCallback(async (msgId) => {
+    const handleDeleteMsg = async (msgId) => {
         try {
-            const res = (await axios.delete(
-                `${url}/api/chat/message/${msgId}`,
-                {
-                    withCredentials: true
-                }
-            )).data;
-            Alert('success', res.message);
+            const { data: { message } } = await api.delete(
+                `/api/chat/message/${msgId}`,
+            );
+    
+            Alert('success', message);
             setMsgs((prev) => {
                 return prev.filter((msg) => msg._id !== msgId);
             });
         } catch (err) {
             console.log(err);
         }
-    }, []);
+    }
 
-    const handleMarkMsgAsRead = useCallback(async (messageId) => {
+    const handleMarkMsgAsRead = async (messageId) => {
         try {
-            await axios.patch(
-                `${url}/api/chat/message/${messageId}/read`,
-                {},
-                {
-                    withCredentials: true
-                }
-            );
+            await api.patch(
+                `/api/chat/message/${messageId}/read`);
         } catch (err) {
             console.log(err);
             Alert(err.response?.data?.message);
         }
-    }, [newMsg]);
+    };
 
     return (
         <div className={'col-span-12 lg:col-span-8 h-[90vh] lg:h-[80vh] flex flex-col justify-between gap-6 rounded-3xl border border-(--secondary-text) p-4 sm:p-6'}>
@@ -176,7 +170,9 @@ function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
                     <div className="h-full flex flex-col gap-2">
                         <div className="w-full flex items-center justify-between p-3 rounded-3xl bg-(--secondary-color)">
                             <div className="flex items-center justify-between gap-3">
-                                <img src={otherUser?.picture} alt="image" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-(--primary-color)" />
+                                <Link to={`/profile/${otherUser?._id}`}>
+                                    <img src={otherUser?.picture} alt="image" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-(--primary-color)" />
+                                </Link>
                                 <div className="flex flex-col">
                                     <h3 className="font-Plus-Jakarta-Sans font-medium text-xl text-(--primary-text) capitalize line-clamp-1">{ otherUser?.name }</h3>
                                     <h5 className="font-Plus-Jakarta-Sans font-light text-sm text-(--secondary-text) capitalize line-clamp-1">
@@ -239,12 +235,11 @@ function Chat({ status, newMsg, deletedMsg, readMsg, unreadMsgs }) {
                             <div className="w-full flex items-center gap-2">
                                 <div className="flex items-center justify-between gap-1">
                                     <PiSmileyLight onClick={() => setShowPicker(!showPicker)} className="text-3xl text-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-95" />
-                                    {/* <PiPaperclipLight className="text-2xl text-(--primary-color) cursor-pointer duration-300 ease-in-out -rotate-45 hover:scale-95"/> */}
                                 </div>
                                 <input onKeyDown={sendMessage} onChange={(event) => setMsg(event.target.value)} value={msg} type="" placeholder="type a mesage..." autoComplete="off" className="w-full font-Plus-Jakarta-Sans font-normal text-base text-(--primary-text) placeholder:text-base sm:placeholder:text-lg placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none placeholder:capitalize" />
                                 {/* <textarea onKeyDown={sendMessage} onChange={(event) => setMsg(event.target.value)} value={msg} type="" placeholder="type a mesage..." autoComplete="off" className="w-full font-Plus-Jakarta-Sans font-normal text-base text-(--primary-text) placeholder:text-base sm:placeholder:text-lg placeholder:text-(--secondary-text) placeholder:font-light focus:outline-none placeholder:capitalize"></textarea> */}
                             </div>
-                            <div ref={sendBtnRef} onClick={sendMessage} className="min-w-10 min-h-10 sm:min-w-12 sm:min-h-12 sm:w-12 sm:h-12 flex items-center justify-center rounded-full text-xl sm:text-2xl text-(--black-color) bg-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-90 hover:text-(--primary-text)">
+                            <div onClick={sendMessage} disabled={isLoading} className="min-w-10 min-h-10 sm:min-w-12 sm:min-h-12 sm:w-12 sm:h-12 flex items-center justify-center rounded-full text-xl sm:text-2xl text-(--black-color) bg-(--primary-color) cursor-pointer duration-300 ease-in-out hover:scale-90 hover:text-(--primary-text)">
                                 <PiPaperPlaneTilt />
                             </div>
                         </div>

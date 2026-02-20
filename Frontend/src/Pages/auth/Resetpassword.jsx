@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from "axios";
 import Loader from "../../components/Loader";
@@ -10,7 +10,7 @@ function Resetpassword() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, url, isLoading } = useProps();
+    const { user, isLoading } = useProps();
 
     // token extracting
     const [ searchParams ] = useSearchParams();
@@ -55,8 +55,8 @@ function Resetpassword() {
         }
 
         try {
-            const res = (await axios.post(`${url}/api/users/resetpassword`, { newPass, confirmPass, token })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { redirectUrl, message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/resetpassword`, { newPass, confirmPass, token });
+            navigate(redirectUrl, { state: { message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
         } 

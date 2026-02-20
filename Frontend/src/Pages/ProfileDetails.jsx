@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { useProps } from "../components/PropsContext";
-import Header from "../components/Header/Header";
-import Footer from "../components/Footer";
-import Loader from "../components/Loader";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useProps } from "../components/PropsProvider";
 import {
 	PiGraduationCap,
 	PiFacebookLogoLight,
@@ -12,216 +8,245 @@ import {
 	PiXLogoLight,
 	PiInfoLight,
 } from 'react-icons/pi';
+import api from "../../utils/axiosInstance";
+// Components
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Loader from "../components/Loader";
 
 
 function ProfileDetails() {
 
     const { id } = useParams();
-    const { url, user } = useProps();
+    const { 
+		user,
+		socket,
+	} = useProps();
 	const navigate = useNavigate();
+
     const [ otherUser, setOtherUser ] = useState(null);
 	const [ profileTab, setProfileTab ] = useState('overview');
 
     useEffect(() => {
-		if (!profileTab || !user) return;
+		if (!user) return;
 		if (id === user._id) navigate(`/profile`)
-
-        const getProfileDetails = async () => {
+		const getProfileDetails = async () => {
             try {
-                const res = (await axios.get(
-                    `${url}/api/users/profile/${id}`,
-                )).data;
-                setOtherUser(res.profile);
+                const { data: { profile } } = await api.get(
+                    `/api/users/${id}/profile`,
+                );
+
+				if (!profile) {
+					navigate("/");
+				} else {
+					setOtherUser(profile);
+				}
+
             } catch (err) {
-                console.log(err)
+                console.log(err);
             }
         }
         if (profileTab.includes('overview')) getProfileDetails();
 
-    }, [profileTab])
+    }, [user])
 
-	const createNewChat = useCallback(async (otherUserId) =>{
+
+	useEffect(() => {
+		if (!socket) return;
+
+		socket.on("userStatus", (data) => {
+			if (data.userId !== id) return;
+			setOtherUser((prev) => {
+				return { ...prev, isActive: data.status === "online"? true : false }
+			})
+		})
+
+	}, [socket])
+
+	const createNewChat = async (otherUserId) =>{
 		try {
-			const res = (await axios.get(
-				`${url}/api/chat/create/${otherUserId}`,
-				{
-					withCredentials: true
-				}
-			)).data;
-			navigate(`/messages/${res.chat._id}`);
+			const { data: { chat } } = await api.get(
+				`/api/chat/create/${otherUserId}`,
+			);
+			navigate(`/messages/${chat._id}`);
 		} catch (err) {
 			console.log(err);
 		}
-	}, [id])
-
-    if (!otherUser) return <Loader />
+	}
 
     return (
 		<main>
 			<Header />
 			<section className="w-full bg-(--bg-color) mt-36 mb-25">
-				<div className="grid grid-cols-12 container mx-auto gap-6">
+				<div className={`relative ${!otherUser && 'h-[50vh]'} grid grid-cols-12 container mx-auto gap-6`}>
 
-					<div className="col-span-12 lg:col-span-4">
-						<div className="w-full flex flex-col items-center rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
-							<div className="relative flex flex-col items-center mb-4">
-								<img
-									src={otherUser.picture}
-									alt="image"
-									className="relative w-56 h-56 rounded-full border-2 border-(--primary-color) object-cover object-center before:content-['mohamed'] before:absolute before:w-20 before:h-20 before:bottom-0 before:right-0 before:rounded-full before:bg-red-500 before:z-50"
-								/>
-								<div className={`${otherUser.isActive? 'block': 'hidden'} absolute bottom-2 right-1/4 translate-x-1/2 w-5 h-5 rounded-full bg-(--primary-color) border-4 border-(--bg-color) z-10`} title="active now"></div>
-							</div>
-							<h2 className="font-Plus-Jakarta-Sans font-medium text-3xl text-(--primary-text) capitalize text-center mb-1">
-								{otherUser.name}
-							</h2>
-							<h3 className="font-Plus-Jakarta-Sans font-normal text-lg text-(--secondary-text) capitalize text-center mb-4">
-								{otherUser.jobTitle}
-							</h3>
-							<button
-								onClick={() => { createNewChat(otherUser._id) }}
-								className="w-full h-13 font-Playfair font-bold capitalize text-lg leading-0 text-(--black-color) bg-(--primary-color) rounded-[20px] border-2 border-(--primary-color) duration-300 ease-in-out hover:scale-95 hover:text-(--primary-color) hover:bg-transparent cursor-pointer"
-							>
-								message
-							</button>
-							<ul className="w-full my-5">
-								<h4 className="font-Plus-Jakarta-Sans font-normal text-2xl text-(--primary-text) capitalize mb-5">
-									contact details
-								</h4>
-								<li className="flex flex-col gap-1 mb-3">
-									<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-										email
-									</h4>
-									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{otherUser.email}
-									</h6>
-								</li>
-								<li className="flex flex-col gap-1 mb-3">
-									<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-										address
-									</h4>
-									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{otherUser.address}
-									</h6>
-								</li>
-								<li className="flex flex-col gap-1">
-									<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-										phone
-									</h4>
-									<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
-										{otherUser.phone}
-									</h6>
-								</li>
-							</ul>
-							<div className="w-full">
-								<h4 className="font-Plus-Jakarta-Sans font-normal text-2xl text-(--primary-text) capitalize mb-5">
-									social links
-								</h4>
-								<div className="flex items-center gap-2">
-									<a
-										href={otherUser.socialMediaHandles.facebook || null}
-										target="_blank"
-									>
-										<div className={`${otherUser.socialMediaHandles.facebook? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
-											<PiFacebookLogoLight className="text-2xl" />
+					{
+						otherUser?
+							<>
+								<div className="col-span-12 lg:col-span-4">
+									<div className="w-full flex flex-col items-center rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
+										<div className="relative flex flex-col items-center mb-4">
+											<img
+												src={otherUser.picture}
+												alt="image"
+												className="relative w-56 h-56 rounded-full border-2 border-(--primary-color) object-cover object-center before:content-['mohamed'] before:absolute before:w-20 before:h-20 before:bottom-0 before:right-0 before:rounded-full before:bg-red-500 before:z-50"
+											/>
+											<div className={`${otherUser.isActive? 'block': 'hidden'} absolute bottom-2 right-1/4 translate-x-1/2 w-5 h-5 rounded-full bg-(--primary-color) border-4 border-(--bg-color) z-10`} title="active now"></div>
 										</div>
-									</a>
-									<a href={otherUser.socialMediaHandles.instagram || null} target="_blank">
-										<div className={`${otherUser.socialMediaHandles.instagram? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
-											<PiInstagramLogoLight className="text-2xl" />
-										</div>
-									</a>
-									<a href={otherUser.socialMediaHandles.twitterX || null} target="_blank">
-										<div className={`${otherUser.socialMediaHandles.twitterX? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
-											<PiXLogoLight className="text-2xl" />
-										</div>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div className='col-span-12 lg:col-span-8'>
-						<div className="w-full rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
-							<nav className="w-full border-b border-(--secondary-text) mb-5">
-								<ul className="flex items-center">
-									<li onClick={() => setProfileTab('overview')} className={`${profileTab.includes('overview')? 'text-(--primary-color) before:absolute before:top-full before:left-0 before:w-full before:border-b before:border-(--primary-color)': 'text-(--primary-text)'} relative pb-3 px-3 font-Plus-Jakarta-Sans font-normal text-xl capitalize cursor-pointer hover:text-(--primary-color)`}>
-										overview
-									</li>
-									<li onClick={() => setProfileTab('reviews')} className={`${profileTab.includes('reviews')? 'text-(--primary-color) before:absolute before:top-full before:left-0 before:w-full before:border-b before:border-(--primary-color)': 'text-(--primary-text)'} relative pb-3 px-3 font-Plus-Jakarta-Sans font-normal text-xl capitalize cursor-pointer hover:text-(--primary-color)`}>
-										reviews
-									</li>
-								</ul>
-							</nav>
-							<div className="flex flex-col gap-3 mb-5">
-								<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-									about me:
-								</h2>
-								{otherUser.aboutMe ? 
-									<pre className="font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) text-wrap">
-										{otherUser.aboutMe}
-									</pre>
-								:
-									<div className="w-full flex flex-col items-center justify-center gap-1">
-										<PiInfoLight className="text-4xl text-(--secondary-text)"/>
-										<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
-									</div>
-								}
-							</div>
-							<div className="flex flex-col gap-3 mb-5">
-								<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-									Certifications:
-								</h2>
-								{ otherUser.certifications.length > 0 ?
-									<ul className="flex flex-col gap-3 py-4">
-										{
-											otherUser.certifications.map((certificate, index) => {
-												return (
-													<li key={index} className="flex items-start gap-3">
-														<div className="min-w-14 h-14 rounded-full flex items-center justify-center text-2xl text-(--primary-text) bg-[rgb(81,194,6,0.15)]">
-															<PiGraduationCap />
-														</div>
-														<div className="flex flex-col font-Plus-Jakarta-Sans">
-															<h3 className="font-normal text-lg text-(--primary-text) capitalize">{ certificate.name }</h3>
-															<h4 className="font-normal text-sm text-(--secondary-text) capitalize mb-2">{ certificate.department }</h4>
-															<p className="font-light text-base text-(--secondary-text) lowercase first-letter:capitalize line-clamp-3">{ certificate.description }</p>
-														</div>
-													</li>
-												)
-											})
-										}
-									</ul>
-								:
-									<div className="w-full flex flex-col items-center justify-center gap-1">
-										<PiInfoLight className="text-4xl text-(--secondary-text)"/>
-										<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
-									</div>
-								}
-							</div>
-							<div className="flex flex-col gap-3 mb-5">
-								<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
-									Language preference:
-								</h2>
-								<div className="flex items-center gap-2">
-									{
-									otherUser.languages.length > 0?
-										otherUser.languages.map((lang, idx) => {
-											return (
-												<h4 className="py-1.5 px-2.5 sm:py-2 sm:px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-sm sm:text-base text-(--secondary-text) capitalize rounded-2xl" key={idx}>
-													{lang}
+										<h2 className="font-Plus-Jakarta-Sans font-medium text-3xl text-(--primary-text) capitalize text-center mb-1">
+											{otherUser.name}
+										</h2>
+										<h3 className="font-Plus-Jakarta-Sans font-normal text-lg text-(--secondary-text) capitalize text-center mb-4">
+											{otherUser.jobTitle}
+										</h3>
+										<button
+											onClick={() => { createNewChat(otherUser._id) }}
+											className="w-full h-13 font-Playfair font-bold capitalize text-lg leading-0 text-(--black-color) bg-(--primary-color) rounded-[20px] border-2 border-(--primary-color) duration-300 ease-in-out hover:scale-95 hover:text-(--primary-color) hover:bg-transparent cursor-pointer"
+										>
+											message
+										</button>
+										<ul className="w-full my-5">
+											<h4 className="font-Plus-Jakarta-Sans font-normal text-2xl text-(--primary-text) capitalize mb-5">
+												contact details
+											</h4>
+											<li className="flex flex-col gap-1 mb-3">
+												<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+													email
 												</h4>
-											)
-										})
-									:
-										<div className="w-full flex flex-col items-center justify-center gap-1">
-											<PiInfoLight className="text-4xl text-(--secondary-text)"/>
-											<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
+												<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
+													{otherUser.email}
+												</h6>
+											</li>
+											<li className="flex flex-col gap-1 mb-3">
+												<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+													address
+												</h4>
+												<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
+													{otherUser.address}
+												</h6>
+											</li>
+											<li className="flex flex-col gap-1">
+												<h4 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+													phone
+												</h4>
+												<h6 className="font-Plus-Jakarta-Sans font-light text-xl text-(--secondary-text) overflow-x-scroll scrollbar-none">
+													{otherUser.phone}
+												</h6>
+											</li>
+										</ul>
+										<div className="w-full">
+											<h4 className="font-Plus-Jakarta-Sans font-normal text-2xl text-(--primary-text) capitalize mb-5">
+												social links
+											</h4>
+											<div className="flex items-center gap-2">
+												<a
+													href={otherUser.socialMediaHandles.facebook || null}
+													target="_blank"
+												>
+													<div className={`${otherUser.socialMediaHandles.facebook? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+														<PiFacebookLogoLight className="text-2xl" />
+													</div>
+												</a>
+												<a href={otherUser.socialMediaHandles.instagram || null} target="_blank">
+													<div className={`${otherUser.socialMediaHandles.instagram? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+														<PiInstagramLogoLight className="text-2xl" />
+													</div>
+												</a>
+												<a href={otherUser.socialMediaHandles.twitterX || null} target="_blank">
+													<div className={`${otherUser.socialMediaHandles.twitterX? 'text-(--primary-color) border-(--primary-color)': 'text-(--primary-text) border-(--primary-text) hover:border-(--primary-color)'} w-12 h-12 flex items-center justify-center rounded-full border-1 duration-300 ease-in-out hover:scale-95 hover:text-(--bg-text) hover:bg-(--primary-color) cursor-pointer`}>
+														<PiXLogoLight className="text-2xl" />
+													</div>
+												</a>
+											</div>
 										</div>
-									}
+									</div>
 								</div>
-							</div>
-						</div>
-					</div>
+
+								<div className='col-span-12 lg:col-span-8'>
+									<div className="w-full rounded-3xl border-2 border-(--secondary-text) p-4 sm:p-6">
+										<nav className="w-full border-b border-(--secondary-text) mb-5">
+											<ul className="flex items-center">
+												<li onClick={() => setProfileTab('overview')} className={`${profileTab.includes('overview')? 'text-(--primary-color) before:absolute before:top-full before:left-0 before:w-full before:border-b before:border-(--primary-color)': 'text-(--primary-text)'} relative pb-3 px-3 font-Plus-Jakarta-Sans font-normal text-xl capitalize cursor-pointer hover:text-(--primary-color)`}>
+													overview
+												</li>
+												<li onClick={() => setProfileTab('reviews')} className={`${profileTab.includes('reviews')? 'text-(--primary-color) before:absolute before:top-full before:left-0 before:w-full before:border-b before:border-(--primary-color)': 'text-(--primary-text)'} relative pb-3 px-3 font-Plus-Jakarta-Sans font-normal text-xl capitalize cursor-pointer hover:text-(--primary-color)`}>
+													reviews
+												</li>
+											</ul>
+										</nav>
+										<div className="flex flex-col gap-3 mb-5">
+											<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+												about me:
+											</h2>
+											{otherUser.aboutMe ? 
+												<pre className="font-Plus-Jakarta-Sans font-extralight text-lg text-(--secondary-text) text-wrap">
+													{ otherUser.aboutMe }
+												</pre>
+											:
+												<div className="w-full flex flex-col items-center justify-center gap-1">
+													<PiInfoLight className="text-4xl text-(--secondary-text)"/>
+													<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
+												</div>
+											}
+										</div>
+										<div className="flex flex-col gap-3 mb-5">
+											<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+												Certifications:
+											</h2>
+											{ otherUser.certifications.length > 0 ?
+												<ul className="flex flex-col gap-3 py-4">
+													{
+														otherUser.certifications.map((certificate, index) => {
+															return (
+																<li key={index} className="flex items-start gap-3">
+																	<div className="min-w-14 h-14 rounded-full flex items-center justify-center text-2xl text-(--primary-text) bg-[rgb(81,194,6,0.15)]">
+																		<PiGraduationCap />
+																	</div>
+																	<div className="flex flex-col font-Plus-Jakarta-Sans">
+																		<h3 className="font-normal text-lg text-(--primary-text) capitalize">{ certificate.name }</h3>
+																		<h4 className="font-normal text-sm text-(--secondary-text) capitalize mb-2">{ certificate.department }</h4>
+																		<p className="font-light text-base text-(--secondary-text) lowercase first-letter:capitalize line-clamp-3">{ certificate.description }</p>
+																	</div>
+																</li>
+															)
+														})
+													}
+												</ul>
+											:
+												<div className="w-full flex flex-col items-center justify-center gap-1">
+													<PiInfoLight className="text-4xl text-(--secondary-text)"/>
+													<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
+												</div>
+											}
+										</div>
+										<div className="flex flex-col gap-3 mb-5">
+											<h2 className="font-Plus-Jakarta-Sans font-normal text-xl text-(--primary-text) capitalize">
+												Language preference:
+											</h2>
+											<div className="flex items-center gap-2">
+												{
+												otherUser.languages.length > 0?
+													otherUser.languages.map((lang, idx) => {
+														return (
+															<h4 className="py-1.5 px-2.5 sm:py-2 sm:px-5 bg-[rgb(144,144,144,0.25)] font-Plus-Jakarta-Sans fotnt-normal text-sm sm:text-base text-(--secondary-text) capitalize rounded-2xl" key={idx}>
+																{lang}
+															</h4>
+														)
+													})
+												:
+													<div className="w-full flex flex-col items-center justify-center gap-1">
+														<PiInfoLight className="text-4xl text-(--secondary-text)"/>
+														<h3 className="font-Plus-Jakarta-Sans font-normal text-base text-(--secondary-text) capitalize">no data found</h3>
+													</div>
+												}
+											</div>
+										</div>
+									</div>
+								</div>
+							</>
+						:
+							<Loader />
+					}
 				</div>
 			</section>
 			<Footer />

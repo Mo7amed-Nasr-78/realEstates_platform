@@ -8,10 +8,10 @@ import { createNotification } from './Notification.js';
 export const getAllBookings = asyncHandler(
     async (req, res) => {
         const userId = req.user.id;
-        const user = await User.findOne({ _id: userId }).select('-_id role');
-        if (user.role !== 'admin') {
-            res.status(500);
-            throw new Error('can\'t handle that request');
+        const { role } = await User.findOne({ _id: userId }).select('-_id role');
+        if (role !== 'admin') {
+            res.status(403);
+            throw new Error('You can\'t handle that request');
         }
 
         const userBookings = await Booking.find()
@@ -29,9 +29,12 @@ export const getAllBookings = asyncHandler(
             },
         ])
 
-        if (userBookings.length < 0) {
-            res.status(400);
-            throw new Error('no bookings found');
+        if (userBookings.length === 0) {
+            res.status(200).json({
+                status: 200,
+                message: "Bookings not found",
+                bookings: userBookings
+            })
         }
 
         res.status(200).json({
@@ -119,8 +122,10 @@ export const getReceivedBookings = asyncHandler(
         ])
 
         if (!bookings) {
-            res.status(404);
-            throw new Error('no booking invitations found');
+            res.status(200).json({
+                status: 200,
+                message: "Booking not found"
+            })
         }
 
         res.status(200).json({ 
@@ -135,23 +140,25 @@ export const getOwnBookings = asyncHandler(
     async (req, res) => {
         const userId = req.user.id;
 
-        const userBookings = await Booking.find({ user: userId })
+        const bookings = await Booking.find({ user: userId })
         .populate({
             path: ['user', 'agent', 'property'],
             select: 'name picture propertyImages'
-        })
+        });
 
-        if (userBookings.length < 0) {
-            res.status(400);
-            throw new Error('you don\'t make any property invitation yet');
-        }
+        if (bookings.length === 0) {
+            res.status(200).json({
+                status: 200,
+                message: 'Bookings not found',
+                bookings
+            });
+        };
 
         res.status(200).json({
             status: 200,
-            total: userBookings.length,
-            bookings: userBookings
-        })
-
+            total: bookings.length,
+            bookings
+        });
     }
 )
 
@@ -162,35 +169,37 @@ export const createBooking = asyncHandler(
 
         if (!name || !email || !phone || !purpose || !time || !date) {
             res.status(400);
-            throw new Error('please, fill all feilds');
+            throw new Error('Please, fill all feilds');
         }
 
         if (!isValidObjectId(propertyId)) {
             res.status(400);
-            throw new Error('invalid property id');
+            throw new Error('Invalid property id');
         }
         
         const property = await Property.findOne({ _id: propertyId });
         if (!property) {
-            res.status(404);
-            throw new Error('property isn\'t found');
+            res.status(200).json({
+                status: 200,
+                message: "Property not found"
+            })
         }
 
         if (userId === property.user.toString()) {
-            res.status(500);
-            throw new Error('internal server error');
+            res.status(400);
+            throw new Error('Invalid request');
         }
 
         const existingBooking = await Booking.findOne({ user: userId, property });
         if (existingBooking) {
             res.status(400);
-            throw new Error(`you\'ve already sent booking and ${existingBooking.status}`);
+            throw new Error(`You\'ve already sent the booking and ${existingBooking.status}`);
         }
 
         const sameScheduledBooking = await Booking.findOne({ time, date });
         if (sameScheduledBooking) {
             res.status(400);
-            throw new Error(`this booking isn\'t available`);
+            throw new Error(`This booking isn\'t available`);
         }
 
         const booking = await Booking.create({
@@ -207,24 +216,25 @@ export const createBooking = asyncHandler(
         })
         await booking.save();
 
+        if (!booking) {
+            res.status(400);
+            throw new Error('Failed to sent the booking');
+        }
+
         property.bookings.push(booking._id);
         await property.save();
 
-        if (!booking) {
-            res.status(500);
-            throw new Error('internal server error');
-        }
 
         await createNotification({
             event: 'newNotification',
             senderId: userId,
             receiverId: property.user.toString(),
-            content: `sent to you booking invitation on ${property.name}`
+            content: `Sent to you booking invitation on ${property.name}`
         });
 
         res.status(201).json({
             status: 201,
-            message: 'your booking has been sent successfully',
+            message: 'Your booking has been sent successfully',
             booking
         })
     }

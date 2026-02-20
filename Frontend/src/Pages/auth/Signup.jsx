@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../../components/Loader";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from "axios";
 import { FacebookProvider, Login } from 'react-facebook';
@@ -9,7 +9,7 @@ import { FacebookProvider, Login } from 'react-facebook';
 function Signup() {
     
     const navigate = useNavigate();
-    const { url, user, isLoading } = useProps();
+    const { user, isLoading } = useProps();
 
     // role extracting
     const [ searchParams ] = useSearchParams();
@@ -49,8 +49,8 @@ function Signup() {
         }
 
         try {
-            const res = (await axios.post(`${url}/api/users/signup/?role=${searchParams.get("role")}`, { name, email, password })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/signup/?role=${searchParams.get("role")}`, { name, email, password });
+            navigate("/signin", { state: { message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
         }
@@ -62,7 +62,7 @@ function Signup() {
         if (!response.authResponse) return;
         try {
             await axios.post(
-                `${url}/auth/facebook/callback`,
+                `${import.meta.env.VITE_BACKEND_URL}/auth/facebook/callback`,
                 {
                     facebookId: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken,
@@ -103,7 +103,7 @@ function Signup() {
                     <span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
                 </div>
                 <div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-                    <Link to={`${url}/auth/google/?role=${searchParams.get('role')}`} className="w-1/2">
+                    <Link to={`${import.meta.env.VITE_BACKEND_URL}/auth/google/?role=${searchParams.get('role')}`} className="w-1/2">
 						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
 							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">
