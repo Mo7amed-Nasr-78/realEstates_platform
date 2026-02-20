@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavList from "./NavList";
 import UserProfile from "./UserProfile";
-import "../../style.css";
+import "../style.css";
 
 const Header = React.memo(function Header() {
 

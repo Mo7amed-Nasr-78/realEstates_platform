@@ -108,6 +108,14 @@ const userSchema = mongoose.Schema({
     properties: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Property' 
+    }],
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Favorite'
+    }],
+    notifications: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Notification'
     }]
 }, {
     timestamps: true

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from "axios";
 import Loader from "../../components/Loader";
@@ -10,13 +10,21 @@ function Resetpassword() {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, url } = useProps();
-    const [ isLoading, setIsLoading ] = useState(false);
+    const { user, isLoading } = useProps();
+
+    // token extracting
+    const [ searchParams ] = useSearchParams();
+    const hasToken = searchParams.has('e');
+    const token = searchParams.get('e');
 
     useEffect(() => {
 		if (user) {
-			navigate("/");
+			navigate('/');
 		}
+
+        if (!hasToken || !token) {
+            navigate('/');
+        }
 	}, [user]);
     
     useEffect(() => {
@@ -25,7 +33,6 @@ function Resetpassword() {
         }
     }, [location.state]);
 
-
     const handleSubmit = async (event) => {
         event.preventDefault();
         event.target.lastChild.disabled = true; 
@@ -33,9 +40,6 @@ function Resetpassword() {
         const newPass = event.target['newPass'].value;
         const confirmPass = event.target['confirmPass'].value;
 
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('e');
-    
         if (!newPass || !confirmPass) {
             Alert('warning', 'please enter all fields first');
             event.target.lastChild.disabled = false; 
@@ -50,25 +54,22 @@ function Resetpassword() {
             return;
         }
 
-        setIsLoading(true);
         try {
-            const res = (await axios.post(`${url}/api/users/resetpassword`, { newPass, confirmPass, token })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { redirectUrl, message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/resetpassword`, { newPass, confirmPass, token });
+            navigate(redirectUrl, { state: { message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
-        } finally {
-            setIsLoading(false);
-        }
+        } 
 
         event.target.reset();
         event.target.lastChild.disabled = false;
     }
 
-    if (isLoading) return <Loader />
+    if (isLoading) return <Loader />;
 
     return (
-        <section className="w-full h-screen flex items-center justify-between bg-(--bg-color)">
-            <div className="w-full lg:w-[50%] h-full flex flex-col items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+        <section className="w-full h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
+            <div className="w-full md:w-3/4 lg:w-1/2 h-full flex flex-col items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
                 <h1 className="text-4xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-center">reset password</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans text-base md:text-lg font-light text-(--secondary-text) text-center mb-6 capitalize">secure your account and get back to exploring your dream home.</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">

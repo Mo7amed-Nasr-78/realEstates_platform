@@ -1,5 +1,7 @@
-import { useProps } from "../components/PropsContext";
-import Header from "../components/Header/Header";
+import { useState } from "react";
+import { useProps } from "../components/PropsProvider";
+import { Link } from "react-router-dom";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Pagination from "../components/Paginations";
 import { 
@@ -7,15 +9,51 @@ import {
     PiBathtub,
     PiGarage,
     PiRulerDuotone,
-    PiHeart,
     PiHeartFill,
 } from 'react-icons/pi';
-import { Link } from "react-router-dom";
 import Loader from "../components/Loader";
+import { useEffect } from "react";
+import Alert from "../components/Alert";
+import api from "../../utils/axiosInstance";
 
 function Favorites() {
 
-    const { isLoading, favorites, setNewFavorite, setPage } = useProps();
+    const { 
+        favorites,
+        isLoading,
+        removeFavorite,
+    } 
+    = useProps();
+
+    const [ Listings, setListings ] = useState([]);
+    const [ page, setPage ] = useState(1);
+
+    useEffect(() => {
+        if (!page) return;
+
+        const getFavorites = async () => {
+            try {
+                const { data: { favorites } } = await api.get(
+                    `/api/favorite/getAll`,
+                    {
+                        params: {
+                            page
+                        }
+                    }
+                )
+
+                setListings(favorites);
+            } catch (err) {
+                if (err.response) {
+                    Alert("error", err.response.data.message);
+                } else {
+                    Alert("error", err.message);
+                }
+            }
+        }
+        getFavorites();
+
+    }, [page, favorites]);
 
     return (
         <main>
@@ -25,22 +63,20 @@ function Favorites() {
                     <div className="flex items-end justify-between mb-5">
                         <div className="flex flex-col gap-1">
                             <h2 className="font-Playfair font-medium text-4xl text-(--primary-text) capitalize">Favorites Ones</h2>
-                            <h4 className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ favorites.length } results of residences</h4>
+                            <h4 className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize">{ favorites?.length } results of residences</h4>
                         </div>
                     </div>
                     <div className="relative grid grid-cols-12 gap-5">
                         {
                             !isLoading?
-                                favorites?.length > 0?
-                                    favorites.map((favorite, index) => {
+                                Listings.length?
+                                    Listings.map((favorite, index) => {
                                         return (
                                             <div key={index} className="col-span-12 sm:col-span-6 lg:col-span-4 relative w-full h-full bg-(--secondary-color) p-3 md:p-4 rounded-3xl sm:rounded-4xl duration-300 ease-in-out hover:scale-[99%]" data-propertyid={favorite?._id}>
                                                 <h4 className="absolute top-5 left-5 sm:top-8 sm:left-8 font-Plus-Jakarta-Sans font-medium text-base text-(--primary-text) bg-(--secondary-color) py-2 px-4 rounded-2xl">{ favorite.forSale }$</h4>
-                                                <div onClick={() => setNewFavorite(favorite)} className="absolute right-5 top-5 sm:right-8 sm:top-8 w-10 h-10 flex items-center justify-center rounded-full bg-(--secondary-color) text-2xl text-(--primary-text) cursor-pointer duration-300 ease-in-out hover:scale-95">
-                                                    { 
-                                                        favorites.some((item) => item?._id === favorite?._id)? <PiHeartFill />: <PiHeart />
-                                                    }
-                                                </div>
+                                                    <div onClick={() => removeFavorite(favorite)} className="absolute right-5 top-5 sm:right-8 sm:top-8 w-10 h-10 flex items-center justify-center rounded-full bg-(--secondary-color) text-2xl text-(--primary-text) cursor-pointer duration-300 ease-in-out hover:scale-95">
+                                                        <PiHeartFill />
+                                                    </div>
                                                 <img src={favorite.propertyImages[0]} alt="image" className="w-full xl:h-56 xxl:h-62 object-cover rounded-2xl mb-3"/>
                                                 <h3 className="font-Plus-Jakarta-Sans font-normal text-2xl text-(--primary-text) capitalize">{ favorite.name }</h3>
                                                 <h4 className="font-Plus-Jakarta-Sans font-light text-base text-(--secondary-text) capitalize mb-2">{ favorite.forSale? 'for sale': '' } - { favorite.forRent? 'for rent': '' }</h4>

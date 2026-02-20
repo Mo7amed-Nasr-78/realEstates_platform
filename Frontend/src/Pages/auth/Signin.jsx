@@ -1,17 +1,23 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import Loader from "../../components/Loader";
 import { FacebookProvider, Login } from 'react-facebook';
+import { setAccessToken } from "../../../utils/axiosInstance";
 
 function Signin() {
+
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { url, user, setUser } = useProps();
-	const [ isLoading, setIsLoading ] = useState(false);
+	const { 
+		user, 
+		setUser,
+		isLoading,
+	} 
+	= useProps();
 
 	useEffect(() => {
 		if (user) {
@@ -50,45 +56,49 @@ function Signin() {
 			return false;
 		}
 
-		setIsLoading(true);
 		try {
-			(
-				await axios.post(
-					`${url}/api/users/signin`,
-					{ email, password },
-					{ withCredentials: true }
-				)
-			).data;
-			const data = await currentAPI();
-			setUser(data);
-			navigate('/');
+			const user = await axios.post(
+				`${import.meta.env.VITE_BACKEND_URL}/api/users/signin`,
+				{ 
+					email, 
+					password 
+				},
+				{
+					withCredentials: true
+				}
+			).then(async (res) => {
+				setAccessToken(res.data.accessToken);
+				const { data: { user } } = await axios.get(
+					`${import.meta.env.VITE_BACKEND_URL}/api/users/current`, {
+						headers: {
+							Authorization: `Bearer ${res.data.accessToken}`
+						}
+					}
+				);
+				return user;
+			});
+
+			setUser(user);
+			setTimeout(() => {
+				navigate("/", { replace: true });
+			}, 1500);
 		} catch (err) {
-			Alert('error', err.response?.data?.message);
-		} finally {
-            setIsLoading(false);
-        }
+			if (err.response) {
+				Alert('error', err.response.data.message);
+			} else {
+				Alert("error", err.message);
+			}
+		}
 
 		event.target.lastChild.disabled = false;
 		event.target.reset();
 	};
 
-	const currentAPI = useCallback(async () => {
-		try {
-			const res = (await axios.get(
-				`${url}/api/users/current`,
-				{ withCredentials: true }
-			));
-			return res.data.user;
-		} catch(err) {
-			console.log(err);
-		}
-	}, []);
-
-	const handleFacebookLogIn = useCallback(async (response) => {
+	const handleFacebookLogIn = async (response) => {
 		if (!response.authResponse) return;
         try {
             await axios.post(
-                `${url}/auth/facebook/callback`,
+                `${import.meta.env.VITE_BACKEND_URL}/auth/facebook/callback`,
                 {
                     facebookId: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken,
@@ -97,13 +107,13 @@ function Signin() {
         } catch (err) {
             console.log(err);
         } 
-    }, []);
+    };
 
 	if (isLoading) return <Loader />
 
 	return (
-		<section className="w-full h-screen flex items-center justify-between bg-(--bg-color)">
-			<div className="w-full lg:w-[50%] h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+		<section className="w-full h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
+			<div className="w-full md:w-3/4 lg:w-1/2 h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-20">
 				<h1 className="text-5xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-start">sign in</h1>
 				<h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans md:text-lg font-light text-(--secondary-text) mb-6 capitalize">
 					Welcome back! Sign in to continue your journey
@@ -125,7 +135,7 @@ function Signin() {
 						id="email"
 						placeholder="Enter Your Email"
 						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)"
-						autoComplete="false"
+						autoComplete="on"
 					/>
 					<label
 						htmlFor="password"
@@ -139,7 +149,7 @@ function Signin() {
 						id="password"
 						placeholder="Enter Your Password"
 						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color)  mb-6 focus:outline-2 focus:outline-(--primary-color)"
-						autoComplete="false"
+						autoComplete="on"
 					/>
 					<button
 						type="submit"
@@ -171,7 +181,7 @@ function Signin() {
 					<span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
 				</div>
 				<div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-					<Link to={`${url}/auth/google`} className="w-1/2">
+					<Link to={`${import.meta.env.VITE_BACKEND_URL}/auth/google`} className="w-1/2">
 						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
 							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">

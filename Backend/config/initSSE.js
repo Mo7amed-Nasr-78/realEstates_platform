@@ -3,7 +3,16 @@ env.config();
 let clients = new Map();
 
 export const initSse = async (req, res) => {
-    const userId = req.user.id;
+    const accessToken = req.query.accessToken || '';
+    let userId = '';
+
+    try {
+        const payload = JSON.parse(atob(accessToken.split(".")[1]));
+        userId = payload.id;
+    } catch {
+        res.status(401);
+        throw new Error('Unauthorized');
+    }
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

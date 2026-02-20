@@ -1,55 +1,50 @@
-import { useCallback, useEffect, useState } from "react";
-import Header from "../components/Header/Header";
-import Footer from "../components/Footer";
-import { useProps } from "../components/PropsContext";
-import axios from "axios";
-import Loader from "../components/Loader";
+import { useEffect, useState } from "react";
+import { useProps } from "../components/PropsProvider";
 import { Link } from "react-router-dom";
+import api from "../../utils/axiosInstance";
+// Components
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Loader from "../components/Loader";
 import Alert from "../components/Alert";
 
 function Bookings() {
 
-    const { url } = useProps();
+    const {  
+        isLoading,
+    } 
+    = useProps();
     const [ bookings, setBookings ] = useState([]);
-    const [ isLoading, setIsLoading ] = useState(false);
     const [ filter, setFilter ] = useState({ sort: '', status: '' })
 
     useEffect(() => {
         const getBookigns = async () => {
-            setIsLoading(true);
             try {
-                const res = (await axios.get(
-                    `${url}/api/booking/receive?sort=${filter.sort}&status=${filter.status}`,
-                    {
-                        withCredentials: true
-                    }
+                const res = (await api.get(
+                    `/api/booking/receive?sort=${filter.sort}&status=${filter.status}`,
                 )).data;
                 setBookings(res.bookings);
             } catch(err) {
                 Alert('error', err.response?.data?.message);
             }
-            setIsLoading(false);
         }
         getBookigns();
 
     }, [filter]);
 
-    const filterUpdating = useCallback((event) => {
+    const filterUpdating = (event) => {
         setFilter((prevs) => {
             return { ...prevs, [event.target.name]: event.target.value }
         })
-    }, [])
+    }
 
-    const bookingUpdating = useCallback(async (event, bookingId, status) => {
+    const updateBooking = async (event, bookingId, status) => {
         try {
-            const res = (await axios.post(
-                `${url}/api/booking/update/${bookingId}`,
+            const res = (await api.post(
+                `/api/booking/${bookingId}/update`,
                 {
                     status: status
                 },
-                {
-                    withCredentials: true
-                }
             )).data;
             
             Alert('success', res.message);
@@ -73,7 +68,7 @@ function Bookings() {
         } catch(err) {
             Alert('error', err.response?.data?.message);
         }
-    }, [])
+    };
 
 
     return (
@@ -126,7 +121,7 @@ function Bookings() {
                         <div className="col-span-12 md:col-span-8 relative grid grid-cols-12 gap-4 border border-(--secondary-text) rounded-3xl p-4 sm:p-6 overflow-hidden order-2">
                             {
                                 !isLoading?
-                                    bookings.length > 0?
+                                    bookings.length?
                                         bookings.map((booking, idx) => {
                                             return (
                                                 <div key={idx} className="col-span-12 relative h-fit rounded-3xl bg-(--bg-color) outline outline-offset-1 outline-white/30 p-4">
@@ -166,9 +161,9 @@ function Bookings() {
                                                         </li>
                                                     </ul>
                                                     <div className={`${['visited', 'rejected'].includes(booking.status) ? 'hidden' : 'flex'} items-center justify-end gap-3`}>
-                                                        <button onClick={(event) => bookingUpdating(event, booking._id, 'accepted')} className={`${booking.status.includes('accepted')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold hover:bg-(--primary-color) hover:text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 bg-transparent text-(--primary-color)`}>accept</button>
-                                                        <button onClick={(event) => bookingUpdating(event, booking._id, 'visited')} className={`${booking.status.includes('pending')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold hover:bg-(--primary-color) hover:text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 bg-transparent text-(--primary-color)`}>done</button>
-                                                        <button onClick={(event) => bookingUpdating(event, booking._id, 'rejected')} className={`${booking.status.includes('accepted')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold text-[#CC4444] border-[#CC4444] cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-[#CC4444] hover:text-(--primary-text)`}>reject</button>
+                                                        <button onClick={(event) => updateBooking(event, booking._id, 'accepted')} className={`${booking.status.includes('accepted')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold hover:bg-(--primary-color) hover:text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 bg-transparent text-(--primary-color)`}>accept</button>
+                                                        <button onClick={(event) => updateBooking(event, booking._id, 'visited')} className={`${booking.status.includes('pending')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold hover:bg-(--primary-color) hover:text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 bg-transparent text-(--primary-color)`}>done</button>
+                                                        <button onClick={(event) => updateBooking(event, booking._id, 'rejected')} className={`${booking.status.includes('accepted')? 'hidden' : 'block'} w-full py-2 px-8 border rounded-2xl font-Playfair text-base capitalize font-semibold text-[#CC4444] border-[#CC4444] cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-[#CC4444] hover:text-(--primary-text)`}>reject</button>
                                                     </div>
                                                 </div>
                                             )

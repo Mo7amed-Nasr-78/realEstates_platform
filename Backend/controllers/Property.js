@@ -61,13 +61,15 @@ export const getCertainProperty = asyncHandler(
 
 		if (!isValidObjectId(propertyId)) {
 			res.status(400);
-			throw new Error('invalid property id');
+			throw new Error('Invalid property id');
 		}
-			
-		const property = await Property.findOne({ _id: propertyId }).populate('user');
+
+		const property = await Property.findOne({ _id: propertyId }).populate("user");
 		if (!property) {
-			res.status(404);
-			throw new Error('property is\'t found');
+			res.status(200).json({
+				status: 200,
+				message: "Property not found"
+			})
 		}
 
 		res.status(200).json({ status: 200, property });
@@ -85,7 +87,7 @@ export const getOwnProperties = asyncHandler(
 		}
 
 		if (user.role !== 'agent') {
-			res.status(400);
+			res.status(404);
 			throw new Error("there aren't properties found");
 		}
 
@@ -144,17 +146,17 @@ export const getOwnProperties = asyncHandler(
 export const uploadProperty = asyncHandler(
 	async (req, res) => {
 		const userId = req.user.id;
+		const role = req.user.role;
 		const images = req.files;
 
-		const user = await User.findOne({ _id: userId });
-		if (user.role !== 'agent') {
+		if (role !== 'agent') {
 			res.status(400);
-			throw new Error('you can\'t handle that request');
+			throw new Error('You can\'t handle that request');
 		}
 
 		if (images.length < 1) {
 			res.status(400);
-			throw new Error('please enter property\'s images');
+			throw new Error('Please, enter property\'s images');
 		}
 
 		let {
@@ -177,7 +179,7 @@ export const uploadProperty = asyncHandler(
 		for (const item of Object.values(req.body)) {
 			if (!item) {
 				res.status(400);
-				throw new Error('please enter all property\'s details');
+				throw new Error('Please, enter all property\'s details');
 			}
 		}
 
@@ -190,7 +192,7 @@ export const uploadProperty = asyncHandler(
 
 		if (isNaN(rooms) || isNaN(bathrooms) || isNaN(garages) || isNaN(area) || isNaN(forSale) || isNaN(forRent)) {
 			res.status(400); 
-			throw new Error('please, enter valid data');
+			throw new Error('Please, enter valid data');
 		}
 
 		let imagePaths = [];
@@ -215,7 +217,7 @@ export const uploadProperty = asyncHandler(
 			imagePaths.push(result.secure_url);
 		}
 
-		const property = new Property({
+		const newProperty = new Property({
 			name,
 			address,
 			rooms,
@@ -234,7 +236,7 @@ export const uploadProperty = asyncHandler(
 			financialInfo: JSON.parse(financials),
 			user: userId
 		});
-		await property.save();
+		await newProperty.save();
 
 		// await createNotification({
 		// 	event: 'notification',
@@ -243,10 +245,17 @@ export const uploadProperty = asyncHandler(
 		// 	content: `your ${property.name} property uploaded and wait for confirm`
 		// });
 
-		user.properties.push(property._id);
-		await user.save();
+		await User.findByIdAndUpdate(
+			userId,
+			{ $addToSet: { properties: newProperty._id } },
+			{ new: true }
+		);
 
-		res.status(201).json({ status: 201, message: "property has been uploaded", property });
+		res.status(201).json({ 
+			status: 201, 
+			message: "Property has been uploaded", 
+			property: newProperty 
+		});
 	}
 );
 
@@ -255,12 +264,12 @@ export const deleteProperty = asyncHandler(
 		const propertyId = req.params.id;
 		if (!isValidObjectId(propertyId)) {
 			res.status(400);
-			throw new Error("invalid property id");
+			throw new Error("Invalid property id");
 		}
-
+		
 		const userId = req.user.id;
-		const user = await User.findOne({ _id: userId }).select('role');
-		if (user.role !== 'agent') {
+		const role = req.user.role;
+		if (role !== 'agent') {
 			res.status(400);
 			throw new Error("You don't have access to update that Property" + propertyId);
 		}
@@ -268,18 +277,37 @@ export const deleteProperty = asyncHandler(
 		const property = await Property.findOne({ _id: propertyId });
 		if (!property) {
 			res.status(400);
-			throw new Error("property isn't found");
+			throw new Error("Property isn't found");
 		}
 
-		const deletedProperty = await Property.deleteOne({ _id: propertyId, status: 'pending' });
-		if (deletedProperty.deletedCount < 1) {
+		for (const url of Object.values(property["propertyImages"])) {
+			const publicId = url.split("/").pop().split(".")[0];
+			await cloudinary.uploader.destroy(
+				`uploads/${userId}/${publicId}`
+			).catch(err => console.log(err));
+		}
+
+		const deletedProperty = await Property.findOneAndDelete({ 
+			_id: propertyId, 
+			status: 'pending'
+		});
+
+		if (!deletedProperty) {
 			res.status(400);
-			throw new Error('you can\'t delete property cause it\'s ' + property.status);
+			throw new Error('You can\'t delete that property cause it\'s ' + property.status);
 		}
 
 		await Booking.deleteMany({ property, status: 'pending' });
+		await User.findByIdAndUpdate(
+			userId,
+			{ $pull: { properties: deletedProperty._id } },
+			{ new: true }
+		);
 
-		res.status(200).json({ status: 200, message: 'Property has been deleted successfully' });
+		res.status(200).json({ 
+			status: 200, 
+			message: 'Property has been deleted successfully' 
+		});
 	}
 )
 

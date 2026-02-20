@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../../components/Loader";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from "axios";
 import { FacebookProvider, Login } from 'react-facebook';
@@ -9,25 +9,30 @@ import { FacebookProvider, Login } from 'react-facebook';
 function Signup() {
     
     const navigate = useNavigate();
+    const { user, isLoading } = useProps();
+
+    // role extracting
     const [ searchParams ] = useSearchParams();
-    const { url, user } = useProps();
-    const [ isLoading, setIsLoading ] = useState(false);
+    const role = searchParams.get("role");
+    const hasRole = searchParams.has("role");
 
     useEffect(() => {
 		if (user) {
 			navigate("/");
 		}
+
+        if (!hasRole || !role) {
+            navigate("/role");
+        }
 	}, [user]);
 
-    const handleSubmit = useCallback(async (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         event.target.lastChild.disabled = true;
         
         const name = event.target['name'].value.trim();
         const email = event.target['email'].value.trim();
         const password = event.target['password'].value.trim();
-        
-        const params = new URLSearchParams(window.location.search);
 
         if (!name || !email || !password) {
             Alert('warning', 'please enter all fields first');
@@ -43,24 +48,21 @@ function Signup() {
             return false;
         }
 
-        setIsLoading(true);
         try {
-            const res = (await axios.post(`${url}/api/users/signup/?role=${params.get("role")}`, { name, email, password })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/signup/?role=${searchParams.get("role")}`, { name, email, password });
+            navigate("/signin", { state: { message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
-        } finally {
-            setIsLoading(false);
         }
         event.target.lastChild.disabled = false;
         event.target.reset();
-    }, [])
+    };
 
-    const handleFacebookLogIn = useCallback(async (response) => {
+    const handleFacebookLogIn = async (response) => {
         if (!response.authResponse) return;
         try {
             await axios.post(
-                `${url}/auth/facebook/callback`,
+                `${import.meta.env.VITE_BACKEND_URL}/auth/facebook/callback`,
                 {
                     facebookId: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken,
@@ -69,13 +71,13 @@ function Signup() {
         } catch (err) {
             console.log(err);
         }
-    }, []);
+    };
 
     if (isLoading) return <Loader />
 
     return (
         <section className="w-full min-h-screen lg:h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
-            <div className="w-ful lg:w-[50%] h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-16 xxl:px-20 py-10 lg:py-0">
+            <div className="w-ful md:w-3/4 lg:w-1/2 h-full flex-col flex items-start justify-center px-5 md:px-10 lg:px-14 xl:px-16 xxl:px-20 py-10 lg:py-0">
                 <h1 className="text-5xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-start">sign up</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans md:text-lg font-light text-(--secondary-text) mb-6 capitalize">Join us! sign up for exclusive real estate updates, listings, and expert insights</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">
@@ -101,7 +103,7 @@ function Signup() {
                     <span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
                 </div>
                 <div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-                    <Link to={`${url}/auth/google/?role=${searchParams.get('role')}`} className="w-1/2">
+                    <Link to={`${import.meta.env.VITE_BACKEND_URL}/auth/google/?role=${searchParams.get('role')}`} className="w-1/2">
 						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
 							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">

@@ -7,7 +7,6 @@ import { days, months } from "../../Data/Data";
 import { useRef } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { useCallback } from "react";
 import Alert from "./Alert";
 
 function Calendar({ onApply, onCancel }) {
@@ -59,25 +58,25 @@ function Calendar({ onApply, onCancel }) {
         })
     }, [selectDay, currentMonth, currentYear]);
 
-    const handlePrevMonth = useCallback(() => {
+    const handlePrevMonth = () => {
         if (currentMonth === 0) {
             setCurrentYear(currentYear - 1);
             setCurrentMonth(11);
         } else {
             setCurrentMonth(currentMonth - 1);
         }
-    }, [currentMonth]);
+    };
 
-    const handleNextMonth = useCallback(() => {
+    const handleNextMonth = () => {
         if (currentMonth === 11) {
             setCurrentYear(currentYear + 1);
             setCurrentMonth(0);
         } else {
             setCurrentMonth(currentMonth + 1);
         }
-    }, [currentMonth])
+    }
 
-    const handleApplying = useCallback((event) => {
+    const handleApplying = (event) => {
         event.preventDefault();
 
         if (!selectDay) {
@@ -96,7 +95,7 @@ function Calendar({ onApply, onCancel }) {
             onCancel?.(false);
         }
 
-    }, [selectDay, currentMonth, currentYear]);
+    }
 
     return (
         <div className="absolute bottom-full left-0 w-full sm:w-80 bg-(--bg-color) outline outline-offset-1 outline-white/10 rounded-xl shadow-sm shadow-white/10 p-3 mt-80">

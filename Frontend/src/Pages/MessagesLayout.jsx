@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import Header from "../components/Header/Header";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ChatList from "../components/ChatList";
 import Chat from "../components/Chat";
-import { useProps } from "../components/PropsContext";
+import { useProps } from "../components/PropsProvider";
 
 function MessagesLayout() {
 

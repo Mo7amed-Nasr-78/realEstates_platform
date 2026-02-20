@@ -28,6 +28,10 @@
 	--black-color-2: #181b1b;
 	--tertiary-color: #c8c5c3;
 	--grey-color: #909090;
+	--red-color: #de350b;
+	--yellow-color: #ffc400;
+	--green-color: #57D9A3;
+	--blue-color: #2684FF;
 
 	/* Background-Colors */
 	--bg-color: #292c33;
@@ -115,7 +119,7 @@ body {
 }
 
 .dropdown {
-	animation: streamline 0.3s ease backwards;
+	animation: streamline 0.2s ease-in-out backwards;
 }
 
 .modal {
@@ -125,7 +129,7 @@ body {
 @keyframes streamline {
 	0% {
 		opacity: 0;
-		transform: translateY(20px);
+		transform: translateY(30px);
 	}
 	100% {
 		opacity: 1;
