@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Header from "../components/Header/Header";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/Loader";
 import {
@@ -22,28 +22,34 @@ import {
 	PiArrowRight,
 	PiArrowLeft,
 } from "react-icons/pi";
-import { useProps } from "../components/PropsContext";
+import { useProps } from "../components/PropsProvider";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Carousel from "../components/Carousel";
-import Calender from "../components/Calendar";
+import Alert from "../components/Alert";
+import api from "../../utils/axiosInstance";
 
 function Home() {
-	const { url, isLoading } = useProps();
+	const { 
+		setUser,
+		setFavorites,
+		isLoading,
+	} 
+	= useProps();
 	const [properties, setProperties] = useState([]);
 
 	useEffect(() => {
 		const getProperties = async () => {
 			try {
-				const res = (
-					await axios.get(`${url}/api/property/getAll`, {
+				const { data: { properties } } = await axios.get(
+					`${import.meta.env.VITE_BACKEND_URL}/api/property/getAll`, 
+					{
 						withCredentials: true,
 						params: {
 							page: 1,
 						},
 					})
-				).data;
-				setProperties(res.properties);
+				setProperties(properties);
 			} catch (err) {
 				console.log(err);
 			}
@@ -51,12 +57,10 @@ function Home() {
 		getProperties();
 	}, []);
 
-	if (isLoading) return <Loader />;
 
 	return (
 		<main>
 			<Header />
-			<Calender />
 			<section className="w-full sm:min-h-screen lg:h-screen mt-26 md:mt-32 lg:mt-0 mb-18 xs:mb-25">
 				<div className="container mx-auto h-full flex flex-col-reverse lg:flex-row items-center justify-between gap-32 xs:gap-36 lg:gap-10 relative">
 					<div className="w-full lg:w-1/2 h-full flex flex-col justify-center mb-24 xs:mb-30 lg:mb-0">
@@ -199,8 +203,8 @@ function Home() {
 					</div>
 				</div>
 			</section>
-			<section className="w-full my-20 sm:my-30">
-				<div className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-18 xs:gap-16 sm:gap-18 lg:gap-6 xl:gap-12">
+			<section className="w-full">
+				<div className="container mx-auto my-20 sm:my-30 flex flex-col lg:flex-row items-center justify-center gap-18 xs:gap-16 sm:gap-18 lg:gap-6 xl:gap-12">
 					<div className="w-full xl:w-[45%] flex flex-col gap-6">
 						<div className="w-full flex items-center gap-3 md:gap-8 lg:gap-6 xl:gap-8">
 							<div className="w-1/2">
@@ -517,7 +521,7 @@ function Home() {
 				</div>
 			</section>
 			<section className="w-full">
-				<div className="container mx-auto w-ful my-18 xs:my-22 xs:py-12">
+				<div className="container mx-auto w-full my-18 xs:my-30">
 					<div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10">
 						<div className="flex flex-col gap-2 mb-3 sm:mb-0">
 							<h2 className="font-Playfair font-medium text-4xl xs:text-5xl sm:text-6xl text-(--primary-text) capitalize">
@@ -528,126 +532,138 @@ function Home() {
 								available residences.
 							</h3>
 						</div>
-						<Link to="listings">
+						<Link to={"/listings"}>
 							<span className="flex items-center gap-1 font-Plus-Jakarta-Sans font-light text-base sm:text-lg text-(--primary-color) capitalize hover:border-b">
 								explore all
 								<PiArrowUpRight className="text-xl" />
 							</span>
 						</Link>
 					</div>
-					<Carousel
-						carouselContainerClasses={"relative"}
-						carouselClasses={
-							"relative w-full flex justify-between gap-4 xxl:gap-6 overflow-x-scroll scrollbar-none"
+					<div className={`${!isLoading? 'h-full': 'h-80'} relative`}>
+						{
+							!isLoading?
+								properties.length > 1?
+									<Carousel
+										carouselContainerClasses={"relative"}
+										carouselClasses={
+											"relative w-full flex justify-between gap-4 xxl:gap-6 overflow-x-scroll scrollbar-none"
+										}
+									>
+										{properties.map((property, idx) => {
+											return (
+												<div
+													key={idx}
+													className={`carousel-card`}
+												>
+													<div className="relative w-full h-68 overflow-hidden object-cover">
+														<img
+															src={
+																property
+																	.propertyImages[0]
+															}
+															alt="image"
+															loading="lazy"
+															className="w-full"
+														/>
+														<div className="absolute w-full h-20 sm:h-22 xl:h-16 bottom-0 left-0">
+															<img
+																src="/card-wave.webp"
+																alt="image"
+																className="absolute left-0 top-0 w-full"
+															/>
+															<span className="absolute top-1/2 -translate-y-1/2 right-5 font-Plus-Jakarta-Sans font-semibold text-lg text-(--primary-text)">
+																{
+																	property.forSale
+																}
+																$
+															</span>
+														</div>
+													</div>
+													<div className="w-full h-full p-5 pt-2">
+														<div className="flex flex-col gap-1 mb-5">
+															<h2 className="font-Playfair font-medium text-2xl text-(--primary-text) capitalize mb-1">
+																{
+																	property.name
+																}
+															</h2>
+															<span className="inline-block h-1 w-1/2 rounded-full bg-linear-to-r from-transparent via-(--primary-color) to-transparent"></span>
+														</div>
+														<ul className="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
+															<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
+																<PiBed className="text-xl" />
+																<span className="font-Plus-Jakarta-Sans font-light text-base">
+																	<span className="">
+																		{
+																			property.rooms
+																		}
+																	</span>{" "}
+																	bed
+																</span>
+															</li>
+															<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
+																<PiBathtub className="text-xl" />
+																<span className="font-Plus-Jakarta-Sans font-light text-base">
+																	<span className="">
+																		{
+																			property.bathrooms
+																		}
+																	</span>{" "}
+																	bath
+																</span>
+															</li>
+															<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
+																<PiGarage className="text-xl" />
+																<span className="font-Plus-Jakarta-Sans font-light text-base">
+																	<span className="">
+																		{
+																			property.garages
+																		}
+																	</span>{" "}
+																	garages
+																</span>
+															</li>
+															<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
+																<PiRulerDuotone className="text-xl" />
+																<span className="font-Plus-Jakarta-Sans font-light text-base">
+																	<span className="">
+																		{
+																			property.area
+																		}
+																	</span>{" "}
+																	sqft
+																</span>
+															</li>
+														</ul>
+														<p className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) first-letter:capitalize line-clamp-2 mb-6">
+															{
+																property.description
+															}
+														</p>
+														<Link
+															to={`/listing/${property._id}`}
+														>
+															<button className="px-10 py-2.5 lg:py-3 border-2 rounded-3xl font-Playfair text-xl capitalize font-bold bg-(--primary-color) text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-transparent hover:text-(--primary-color)">
+																view
+																more
+															</button>
+														</Link>
+													</div>
+												</div>
+											);
+										})}
+									</Carousel>
+								:
+									<div className="w-full h-80 flex items-center justify-center">
+                                        <h1 className="col-span-12 font-Plus-Jakarta-Sans font-medium text-xl text-(--primary-text) text-center capitalize">Not Properties found</h1>
+                                    </div>
+							: 
+								<Loader />
 						}
-					>
-						{properties.map((property, idx) => {
-							return (
-								<div
-									key={idx}
-									className={`carousel-card`}
-								>
-									<div className="relative w-full h-68 overflow-hidden object-cover">
-										<img
-											src={
-												property
-													.propertyImages[0]
-											}
-											alt="image"
-											loading="lazy"
-											className="w-full"
-										/>
-										<div className="absolute w-full h-20 sm:h-22 xl:h-16 bottom-0 left-0">
-											<img
-												src="/card-wave.webp"
-												alt="image"
-												className="absolute left-0 top-0 w-full"
-											/>
-											<span className="absolute top-1/2 -translate-y-1/2 right-5 font-Plus-Jakarta-Sans font-semibold text-lg text-(--primary-text)">
-												{
-													property.forSale
-												}
-												$
-											</span>
-										</div>
-									</div>
-									<div className="w-full h-full p-5 pt-2">
-										<div className="flex flex-col gap-1 mb-5">
-											<h2 className="font-Playfair font-medium text-2xl text-(--primary-text) capitalize mb-1">
-												{
-													property.name
-												}
-											</h2>
-											<span className="inline-block h-1 w-1/2 rounded-full bg-linear-to-r from-transparent via-(--primary-color) to-transparent"></span>
-										</div>
-										<ul className="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
-											<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
-												<PiBed className="text-xl" />
-												<span className="font-Plus-Jakarta-Sans font-light text-base">
-													<span className="">
-														{
-															property.rooms
-														}
-													</span>{" "}
-													bed
-												</span>
-											</li>
-											<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
-												<PiBathtub className="text-xl" />
-												<span className="font-Plus-Jakarta-Sans font-light text-base">
-													<span className="">
-														{
-															property.bathrooms
-														}
-													</span>{" "}
-													bath
-												</span>
-											</li>
-											<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
-												<PiGarage className="text-xl" />
-												<span className="font-Plus-Jakarta-Sans font-light text-base">
-													<span className="">
-														{
-															property.garages
-														}
-													</span>{" "}
-													garages
-												</span>
-											</li>
-											<li className="flex items-center gap-1 text-(--secondary-text) capitalize">
-												<PiRulerDuotone className="text-xl" />
-												<span className="font-Plus-Jakarta-Sans font-light text-base">
-													<span className="">
-														{
-															property.area
-														}
-													</span>{" "}
-													sqft
-												</span>
-											</li>
-										</ul>
-										<p className="font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) first-letter:capitalize line-clamp-2 mb-6">
-											{
-												property.description
-											}
-										</p>
-										<Link
-											to={`/listing/${property._id}`}
-										>
-											<button className="px-10 py-2.5 lg:py-3 border-2 rounded-3xl font-Playfair text-xl capitalize font-bold bg-(--primary-color) text-(--black-color) border-(--primary-color) cursor-pointer transition duration-300 ease-in-out hover:scale-95 hover:bg-transparent hover:text-(--primary-color)">
-												view
-												more
-											</button>
-										</Link>
-									</div>
-								</div>
-							);
-						})}
-					</Carousel>
+					</div>
 				</div>
 			</section>
 			<section className="w-full">
-				<div className="relative container mx-auto w-ful xs:my-22 xs:py-12">
+				<div className="relative container mx-auto w-full my-18 xs:my-30">
 					<div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-3 sm:mb-10">
 						<div className="flex flex-col gap-2 mb-3 sm:mb-0">
 							<h2 className="font-Playfair font-medium text-4xl xs:text-5xl sm:text-6xl text-(--primary-text) capitalize">

@@ -2,15 +2,22 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import Loader from "../../components/Loader";
 import { FacebookProvider, Login } from 'react-facebook';
+import { setAccessToken } from "../../../utils/axiosInstance";
 
 function Signin() {
+
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { url, user, setUser, isLoading } = useProps();
+	const { 
+		user, 
+		setUser,
+		isLoading,
+	} 
+	= useProps();
 
 	useEffect(() => {
 		if (user) {
@@ -50,41 +57,48 @@ function Signin() {
 		}
 
 		try {
-			(
-				await axios.post(
-					`${url}/api/users/signin`,
-					{ email, password },
-					{ withCredentials: true }
-				)
-			).data;
-			const data = await currentAPI();
-			setUser(data);
-			navigate('/');
+			const user = await axios.post(
+				`${import.meta.env.VITE_BACKEND_URL}/api/users/signin`,
+				{ 
+					email, 
+					password 
+				},
+				{
+					withCredentials: true
+				}
+			).then(async (res) => {
+				setAccessToken(res.data.accessToken);
+				const { data: { user } } = await axios.get(
+					`${import.meta.env.VITE_BACKEND_URL}/api/users/current`, {
+						headers: {
+							Authorization: `Bearer ${res.data.accessToken}`
+						}
+					}
+				);
+				return user;
+			});
+
+			setUser(user);
+			setTimeout(() => {
+				navigate("/", { replace: true });
+			}, 1500);
 		} catch (err) {
-			Alert('error', err.response?.data?.message);
+			if (err.response) {
+				Alert('error', err.response.data.message);
+			} else {
+				Alert("error", err.message);
+			}
 		}
 
 		event.target.lastChild.disabled = false;
 		event.target.reset();
 	};
 
-	const currentAPI = async () => {
-		try {
-			const res = (await axios.get(
-				`${url}/api/users/current`,
-				{ withCredentials: true }
-			));
-			return res.data.user;
-		} catch(err) {
-			console.log(err);
-		}
-	};
-
 	const handleFacebookLogIn = async (response) => {
 		if (!response.authResponse) return;
         try {
             await axios.post(
-                `${url}/auth/facebook/callback`,
+                `${import.meta.env.VITE_BACKEND_URL}/auth/facebook/callback`,
                 {
                     facebookId: response.authResponse.userID,
                     accessToken: response.authResponse.accessToken,
@@ -121,7 +135,7 @@ function Signin() {
 						id="email"
 						placeholder="Enter Your Email"
 						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color) mb-4 focus:outline-2 focus:outline-(--primary-color)"
-						autoComplete="false"
+						autoComplete="on"
 					/>
 					<label
 						htmlFor="password"
@@ -135,7 +149,7 @@ function Signin() {
 						id="password"
 						placeholder="Enter Your Password"
 						className="h-13 w-full rounded-[20px] px-4 sm:px-6 bg-[#676e80bd]/25 text-lg text-(--primary-text) placeholder:font-light placeholder:text-(--tertiary-color)  mb-6 focus:outline-2 focus:outline-(--primary-color)"
-						autoComplete="false"
+						autoComplete="on"
 					/>
 					<button
 						type="submit"
@@ -167,7 +181,7 @@ function Signin() {
 					<span className="h-[1px] w-[50%] rounded-full bg-(--primary-text)"></span>
 				</div>
 				<div className="w-full flex items-center justify-between gap-4 sm:gap-10">
-					<Link to={`${url}/auth/google`} className="w-1/2">
+					<Link to={`${import.meta.env.VITE_BACKEND_URL}/auth/google`} className="w-1/2">
 						<button className="w-full h-13 bg-[#363C4D] flex items-center justify-center gap-2 rounded-[20px] cursor-pointer transition duration-300 ease-in-out hover:scale-95">
 							<img src="/google.svg" alt="icon" />
 							<h4 className="text-base font-Plus-Jakarta-Sans font-medium capitalize text-(--primary-text)">

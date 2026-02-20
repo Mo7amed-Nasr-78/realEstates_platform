@@ -10,15 +10,15 @@ import {
 	resetPassword,
 	currentUser,
 	userUpdate,
-	logOutUser,
+	signout,
 	getProfile,
 	getOnlineUsers,
-	updateUserStatus
+	updateUserStatus,
 } from "../controllers/User.js";
-import validateToken from '../middlewares/validateTokenHandle.js';
-import multer from '../config/multer.js'
+import validateToken from "../middlewares/validateTokenHandling.js";
+import multer from "../config/multer.js";
 
-router.route("/profile/:id").get(getProfile); 
+router.route("/:id/profile").get(getProfile);
 
 router.route("/otp/verify").post(verifyOtp);
 
@@ -26,13 +26,13 @@ router.route("/signup").post(signup);
 
 router.route("/signin").post(signin);
 
-router.route("/logout").post(validateToken, logOutUser);
+router.route("/signout").post(validateToken, signout);
 
 router.route("/current").get(validateToken, currentUser);
 
 router.route("/online").get(getOnlineUsers);
 
-router.route("/userStatus").post(validateToken, updateUserStatus);
+router.route("/user-status").post(validateToken, updateUserStatus);
 
 router.route("/forgetpassword").post(forgetPassword);
 
@@ -40,9 +40,8 @@ router.route("/resetpassword").post(resetPassword);
 
 router.route("/update").post(
 	validateToken,
-	multer.single('profileImg'),
+	multer.single("profileImg"),
 	userUpdate
 );
-
 
 export default router;

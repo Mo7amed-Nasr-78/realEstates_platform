@@ -1,12 +1,16 @@
-import express from 'express';
+import express from "express";
 const router = express.Router();
-import validateToken from '../middlewares/validateTokenHandle.js';
-import { getNotification, readNotifications, clearNotifications } from '../controllers/Notification.js';
+import validateToken from "../middlewares/validateTokenHandling.js";
+import {
+	getNotification,
+	readNotifications,
+	clearNotifications,
+} from "../controllers/Notification.js";
 
-router.route('/get').get(validateToken, getNotification);
+router.route("/get").get(validateToken, getNotification);
 
-router.route('/read').put(validateToken, readNotifications);
+router.route("/read").put(validateToken, readNotifications);
 
-router.route('/clearAll').delete(validateToken, clearNotifications);
+router.route("/clearAll").delete(validateToken, clearNotifications);
 
 export default router;

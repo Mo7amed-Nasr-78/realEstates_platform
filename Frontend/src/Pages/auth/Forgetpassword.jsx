@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from 'axios';
 import Loader from "../../components/Loader";
@@ -8,7 +8,7 @@ import Loader from "../../components/Loader";
 function Forgetpassword() {
 
     const navigate = useNavigate();
-    const { user, url, isLoading } = useProps();
+    const { user, isLoading } = useProps();
 
     useEffect(() => {
 		if (user) {
@@ -37,8 +37,8 @@ function Forgetpassword() {
         }
 
         try {
-            const res = (await axios.post(`${url}/api/users/forgetpassword`, { email })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { redirectUrl, message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/forgetpassword`, { email });
+            navigate(redirectUrl, { state: { message: message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
         } 

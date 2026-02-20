@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
-import Favorite from '../models/favoriteModel.js'
+import Favorite from '../models/favoriteModel.js';
+import User from '../models/userModel.js';
 import { isValidObjectId } from 'mongoose';
 
 export const getFavroites = asyncHandler(
@@ -30,7 +31,15 @@ export const getFavroites = asyncHandler(
             }, {
                 $replaceRoot: { newRoot: "$property" }
             }
-        ])
+        ]);
+
+        if (favorites.length === 0) {
+            res.status(200).json({
+                status: 200,
+                message: "Favorites not found",
+                favorites: []
+            })
+        }
 
         res.status(200).json({ status: 200, favorites });
     }
@@ -43,40 +52,57 @@ export const addFavorite = asyncHandler(
 
         if (!isValidObjectId(propertyId)) {
             res.status(400);
-            throw new Error('invalid property id');
+            throw new Error('Invalid property id');
         }
 
-        const favoriteExisting = await Favorite.findOne({ property: propertyId, user: userId });
-
-        if (favoriteExisting) {
+        const favorite = await Favorite.findOne({ property: propertyId, user: userId });
+        if (favorite) {
             res.status(400);
-            throw new Error('property is already added to your favorite list');
+            throw new Error('Property is already added to your favorites');
         }
-
-        const favorite = new Favorite({
+        
+        const newFavorite = new Favorite({
             user: userId,
             property: propertyId
         });
-        await favorite.save();
-        await favorite.populate({
-            path: 'user property',
-            select: '-password'
-        })
+        await newFavorite.save();
+        await User.findByIdAndUpdate(
+            userId,
+            { $addToSet: { favorites: newFavorite._id } },
+            { new: true }
+        );
 
-        res.status(200).json({ status: 200, message: 'property added to your favorite list' })
+        res.status(200).json({ 
+            status: 200, 
+            message: 'Property added to your favorites',
+            favorite: newFavorite
+        })
     }
 )
 
-export const deleteFavorite = asyncHandler(
+export const removeFavorite = asyncHandler(
     async (req, res) => {
+        const userId = req.user.id;
         const { propertyId } = req.body;
 
-        const deletedProperty = await Favorite.deleteOne({ property: propertyId });
-        if (deletedProperty.deletedCount === 0) {
-            res.status(400);
-            throw new Error('property is\'t found');
+        const deletedFavorite = await Favorite.findOneAndDelete({ property: propertyId, user: userId  });
+        if (!deletedFavorite) {
+            res.status(200).json({
+                status: 200,
+                message: "Favorite not found"
+            })
         }
 
-        res.status(200).json({ status: 200, message: 'property deleted from your favorite list' });
+        await User.findByIdAndUpdate(
+            userId,
+            { $pull: { favorites: deletedFavorite._id } },
+            { new: true }
+        );
+
+        res.status(200).json({ 
+            status: 200, 
+            message: 'Property removed from your favorites',
+            deletedFavorite
+        });
     }
 )

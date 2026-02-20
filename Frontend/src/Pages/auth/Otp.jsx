@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from "axios";
 
@@ -10,7 +10,7 @@ function Otp() {
     const location = useLocation();
     const inputsRef = useRef([]);
     const navigate = useNavigate();
-    const { user, url, isLoading } = useProps();
+    const { user, isLoading } = useProps();
     const [ otp, setOtp ] = useState(["","","","","",""]);
     
     // token extracting
@@ -45,11 +45,14 @@ function Otp() {
         }
 
         try {
-            const res = (await axios.post(`${url}/api/users/otp/verify`, { otp: enteredOtp, token })).data;
-            console.log(res);
+            const res = (await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/otp/verify`, { otp: enteredOtp, token })).data;
             navigate(res.redirectUrl, { state: { message: res.message } })
         } catch (err) {
-            Alert('error', err.response?.data?.message);
+            if (err.response) {
+                Alert("error", err.response.data.message);
+            } else {
+                Alert("error", err.message);
+            }
         } 
     }
 

@@ -12,9 +12,6 @@ dotenv.config();
 import User from "../models/userModel.js";
 import Otp from "../models/otpModel.js";
 
-// @Desc user register
-// @URL <POST> /api/users/
-// @Access public
 export const signup = asyncHandler(async (req, res) => {
 	const { name, email, password } = req.body;
 	const role = req.query.role;
@@ -40,7 +37,6 @@ export const signup = asyncHandler(async (req, res) => {
 		res.status(201).json({
 			status: 201,
 			message: "the account has been created successfully",
-			redirectUrl: "/signin",
 		});
 	} else {
 		res.status(500);
@@ -48,9 +44,6 @@ export const signup = asyncHandler(async (req, res) => {
 	}
 });
 
-// @Desc signin
-// @URL <POST> /api/users/login
-// @Access public
 export const signin = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 	if (!email || !password) {
@@ -74,59 +67,70 @@ export const signin = asyncHandler(async (req, res) => {
 		{
 			id: user.id,
 			email: user.email,
+			role: user.role
 		},
 		process.env.ACCESS_TOKEN_SECRET,
 		{
-			expiresIn: "60000s", // Token is valid for 1 hour
+			expiresIn: "15m", // Token is valid for 1 hour
 		}
 	);
 
-	res.cookie("accessToken", accessToken, {
+	const refreshToken = jwt.sign(
+		{
+			id: user.id
+		},
+		process.env.ACCESS_TOKEN_SECRET,
+		{
+			expiresIn: '7d'
+		}
+	)
+
+	res.cookie("refreshToken", refreshToken, {
 		secure: true,
 		httpOnly: true,
 		sameSite: "none",
-		maxAge: 24 * 60 * 60 * 1000,
+		path: '/auth/refresh',
 	});
 
 	res.status(200).json({
 		status: 200,
 		message: "you've signed in successfully",
 		accessToken: accessToken,
-		redirectUrl: "/",
 	});
 });
 
-// @Desc current
-// @URL <GET> /api/users/current
-// @Access private
+export const signout = asyncHandler(async (req, res) => {
+	res.clearCookie("refreshToken", {
+		secure: true,
+		httpOnly: true,
+		sameSite: "none",
+		path: "/auth/refresh",
+	});
+	res.json({ status: 200, meg: "Logged Out" });
+});
+
 export const currentUser = asyncHandler(async (req, res) => {
 	const { email } = req.user;
-	const user = await User.findOne({ email }, { password: 0, googleId: 0, otp: 0 });
+	const user = await User.findOne(
+		{ email }, 
+		{ 
+			password: 0, 
+			googleId: 0,
+			facebookId: 0, 
+			otp: 0,
+		}
+	).populate({
+		path: "favorites",
+		select: "_id property"
+	});
 
-	// console.log(req.headers["user-agent"]);
 	if (!user) {
-		res.status(404).json({ meg: "user isn't found!" });
+		res.status(404).json({ meg: "Account not found" });
 	}
 
 	res.status(200).json({ status: 200, user });
 });
 
-// @Desc logOut
-// @URL <GET> /api/users/logout
-// @Access private
-export const logOutUser = asyncHandler(async (req, res) => {
-	res.clearCookie("accessToken", {
-		httpOnly: true,
-		sameSite: "none",
-		secure: true,
-		path: "/",
-	});
-	res.json({ status: 200, meg: "Logged Out" });
-});
-
-// @Desc Forget-Password
-// @URL <POST> /api/users/forgetpassword
-// @Access Public
 export const forgetPassword = asyncHandler(async (req, res) => {
 	const { email } = req.body;
 
@@ -170,9 +174,6 @@ export const forgetPassword = asyncHandler(async (req, res) => {
 	});
 });
 
-// @Desc OTP Verification
-// @URL <POST> /api/users/otp/verify
-// @Access Public
 export const verifyOtp = asyncHandler(async (req, res) => {
 	const { otp, token } = req.body;
 	const email = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET).email;
@@ -209,9 +210,6 @@ export const verifyOtp = asyncHandler(async (req, res) => {
 	}
 });
 
-// @Desc OTP Resending
-// @URL <POST> /api/users/otp/resend
-// @Access Public
 export const resendOtp = async (req, res) => {
 	const { token } = req.body;
 	const email = jwt.decode(token);
@@ -246,9 +244,6 @@ export const resendOtp = async (req, res) => {
 	});
 };
 
-// @Desc Reset-Password
-// @URL <POST> /api/users/otp/resend
-// @Access Public
 export const resetPassword = asyncHandler(async (req, res) => {
 	const { newPass, confirmPass, token } = req.body;
 	const email = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET).email;
@@ -279,9 +274,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
 	});
 });
 
-// @Desc Update User Info
-// @URL <POST> /api/users/update
-// @Access Private
 export const userUpdate = asyncHandler(async (req, res) => {
 	const userId = req.user.id;
 	let { certifications, socials, languages, ...info } = req.body;
@@ -364,9 +356,6 @@ export const userUpdate = asyncHandler(async (req, res) => {
 	});
 });
 
-// @Desc Profile Fetching
-// @URL <Get> /api/users/profile/:id
-// @Access public
 export const getProfile = asyncHandler(async (req, res) => {
 	const profileId = req.params.id;
 
@@ -376,37 +365,35 @@ export const getProfile = asyncHandler(async (req, res) => {
 	}
 
 	const user = await User.findOne({ _id: profileId })
-	.select('-password');
+	.select('-password -updatedAt -otp -googleId -facebookId');
 
 	if (!user) {
-		res.status(404);
-		throw new Error("the account is't found");
+		res.status(200).json({
+			status: 200,
+			message: "Profile not found"
+		})
 	}
 
 	res.status(200).json({ status: 200, profile: user });
 });
 
-// @Desc online users Fetching
-// @URL <Get> /api/users/online
-// @Access public
 export const getOnlineUsers = asyncHandler(async (req, res) => {
 	
 	const onlineUsers = await User.find({ isActive: true });
 	if (!onlineUsers) {
-		res.status(400);
-		throw new Error('no online users found');
+		res.status(200).json({
+			status: 200,
+			message: "No online users found"
+		})
 	}
 	res.status(200).json({ status: 200, onlineUsers });
 
 });
 
-// @Desc user status
-// @URL <Get> /api/users/userStatus
-// @Access private
 export const updateUserStatus = asyncHandler(async (req, res) => {
 	const { userId, status } = req.body;
 
-	const user = await User.findOne({ _id: userId }).select('-password');
+	const user = await User.findOne({ _id: userId }).select('isActive');
 	if (status === 'online') {
 		user.isActive = true;
 		await user.save();
@@ -420,7 +407,7 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 	res.status(200).json({ 
 		status: 200, 
 		status: user.isActive,
-		message: 'user status has been updated',
+		message: 'User status has been updated',
 	});
 
 });

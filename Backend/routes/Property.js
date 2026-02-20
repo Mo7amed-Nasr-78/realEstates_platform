@@ -1,14 +1,25 @@
 import express from "express";
-import validateToken from "../middlewares/validateTokenHandle.js";
-import { deleteProperty, getCertainProperty, getOwnProperties, getProperties, updateProperty, uploadProperty } from "../controllers/Property.js";
+import validateToken from "../middlewares/validateTokenHandling.js";
+import {
+	deleteProperty,
+	getCertainProperty,
+	getOwnProperties,
+	getProperties,
+	updateProperty,
+	uploadProperty,
+} from "../controllers/Property.js";
 import multer from "../config/multer.js";
 const router = express.Router();
 
-router.route('/get').get(validateToken, getOwnProperties);
+router.route("/:id/details").get(getCertainProperty);
 
-router.route('/getAll').get(getProperties);
+router.route("/:id/delete").delete(validateToken, deleteProperty);
 
-router.route('/details/:id').get(getCertainProperty);
+router.route("/:id/update").patch(validateToken, updateProperty);
+
+router.route("/get").get(validateToken, getOwnProperties);
+
+router.route("/getAll").get(getProperties);
 
 router.route("/upload").post(
 	validateToken,
@@ -20,9 +31,5 @@ router.route("/upload").post(
 	]),
 	uploadProperty
 );
-
-router.route('/delete/:id').delete(validateToken, deleteProperty);
-
-router.route('/update/:id').patch(validateToken, updateProperty);
 
 export default router;
