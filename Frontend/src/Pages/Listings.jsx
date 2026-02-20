@@ -38,8 +38,12 @@ function Listings() {
                             page,
                         },
                     }
-                )
-                setListings(properties);
+                );
+
+                if (properties) {
+                    setListings(properties);
+                }
+                    
             } catch (err) {
                 console.log(err);
             } finally {
