@@ -26,13 +26,9 @@ import { useProps } from "../components/PropsProvider";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Carousel from "../components/Carousel";
-import Alert from "../components/Alert";
-import api from "../../utils/axiosInstance";
 
 function Home() {
 	const { 
-		setUser,
-		setFavorites,
 		isLoading,
 	} 
 	= useProps();
@@ -49,7 +45,9 @@ function Home() {
 							page: 1,
 						},
 					})
-				setProperties(properties);
+				if (properties) {
+					setProperties(properties);
+				}
 			} catch (err) {
 				console.log(err);
 			}
