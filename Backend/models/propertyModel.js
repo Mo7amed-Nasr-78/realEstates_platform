@@ -90,6 +90,8 @@ const PropertySchema = mongoose.Schema(
 			type: Boolean,
 			default: false
 		},
+
+		// Relations
 		user: { 
 			type: mongoose.Schema.Types.ObjectId, 
 			ref: 'User', 

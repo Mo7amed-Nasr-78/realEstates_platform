@@ -9,9 +9,9 @@ function ProtectedRoute({ children, isLoading, user }) {
         if (!isLoading && !user) {
             navigate('/')
         }
-    }, [isLoading, navigate, user])
+    }, [isLoading, user])
 
-    if (isLoading) return <Loader />
+    // if (isLoading) return null;
 
     return user? children: null;
 }

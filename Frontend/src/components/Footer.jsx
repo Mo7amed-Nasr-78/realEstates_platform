@@ -12,7 +12,7 @@ function Footer() {
     return (
         <footer className="p-4 sm:p-6">
             <div className="w-full bg-(--black-color) rounded-3xl">
-                <div className="container mx-auto py-8 px-5 lg:px-0">
+                <div className="container mx-auto py-8 px-5 lg:px-2">
                     <img src="/logo.svg" alt="logo" className="h-13 lg:h-15 mb-3 sm:mb-5"/>
                     <div className="flex flex-col lg:flex-row items-start lg:justify-between gap-8 lg:gap-0">
                         <div className="w-full lg:w-1/2 flex flex-col">

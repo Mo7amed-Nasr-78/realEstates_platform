@@ -1,12 +1,16 @@
-import express from 'express';
-import { addFavorite, deleteFavorite, getFavroites } from '../controllers/Favorites.js';
-import validateToken from '../middlewares/validateTokenHandle.js';
+import express from "express";
+import {
+	addFavorite,
+	removeFavorite,
+	getFavroites,
+} from "../controllers/Favorites.js";
+import validateToken from "../middlewares/validateTokenHandling.js";
 const router = express.Router();
 
-router.route('/getAll').get(validateToken, getFavroites);
+router.route("/getAll").get(validateToken, getFavroites);
 
-router.route('/add').post(validateToken, addFavorite);
+router.route("/add").post(validateToken, addFavorite);
 
-router.route('/delete').post(validateToken, deleteFavorite);
+router.route("/remove").post(validateToken, removeFavorite);
 
 export default router;

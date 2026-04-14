@@ -7,7 +7,7 @@ dotenv.config();
 // DB Models
 import User from '../models/userModel.js'
 
-const url = 'http://localhost:5173/';
+const url = process.env.FRONT_END_URL;
 
 const createToken = (payload) => {
 	const accessToken = jwt.sign(
@@ -21,6 +21,17 @@ const createToken = (payload) => {
 
 	return accessToken;
 };
+
+function generatePassword(length = 16) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    
+    for (let i = 0; i < length; i++) {
+        password += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    return password;
+}
 
 export const googleRedirect = async (req, res) => {
 	const role = req.query.role;
@@ -59,9 +70,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		});
 		if (existingUser.googleId === decoded.sub) {
 			res.cookie("accessToken", accessToken, {
-				secure: false,
+				secure: true,
 				httpOnly: true,
-				sameSite: "strict",
+				sameSite: "none",
+				maxAge: 24 * 60 * 60 * 1000
 			});
 			
 			res.redirect(url);
@@ -70,9 +82,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		existingUser.googleId = decoded.sub;
 		await existingUser.save();
 		res.cookie("accessToken", accessToken, {
-			secure: false,
+			secure: true,
 			httpOnly: true,
-			sameSite: "strict",
+			sameSite: "none",
+			maxAge: 24 * 60 * 60 * 1000
 		});
 			
 		res.redirect(url);
@@ -83,7 +96,7 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		name: decoded.name,
 		email: decoded.email,
 		googleId: decoded.sub,
-		password: await bcrypt.hash(decoded.sub, 10),
+		password: await bcrypt.hash(generatePassword(length = 12), 10),
 		picture: "https://res.cloudinary.com/de5sekaom/image/upload/v1755117756/default-profile-img_f7br6d.jpg",
 	});
 
@@ -91,10 +104,12 @@ export const googleAuth = asyncHandler(async (req, res) => {
 		id: newUser._doc._id,
 		email: newUser._doc.email,
 	});
+	
 	res.cookie("accessToken", accessToken, {
-		secure: false,
+		secure: true,
 		httpOnly: true,
-		sameSite: "strict",
+		sameSite: "none",
+		maxAge: 24 * 60 * 60 * 1000,
 	});
 
 	res.redirect(url);
@@ -104,7 +119,8 @@ export const facebookAuth = asyncHandler(
 	async (req, res) => {
 		const { facebookId, accessToken } = req.body;
 
-		const response = await fetch(`https://graph.facebook.com/me?access_token=${accessToken}`);
+		const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`);
+
 		const fbUser = await response.json();
 
 		if (fbUser.id !== facebookId) {
@@ -117,9 +133,10 @@ export const facebookAuth = asyncHandler(
 		if (!user) {
 			user = new User({ 
 				facebookId,
-				name,
-				email,
-				picture
+				name: fbUser.name,
+				email: fbUser.email,
+				password: await bcrypt.hash(generatePassword(length = 12), 10),
+				picture: fbUser.picture.data.url
 			});
 
 			await user.save();
@@ -129,12 +146,41 @@ export const facebookAuth = asyncHandler(
 			id: user._id,
 			email: user.email,
 		});
+
 		res.cookie("accessToken", token, {
-			secure: false,
+			secure: true,
 			httpOnly: true,
-			sameSite: "strict",
+			sameSite: "none",
+			maxAge: 24 * 60 * 60 * 1000,
 		});
 
 		res.redirect(url)
+	}
+);
+
+export const refresh = asyncHandler(
+	async (req, res) => {
+		const refreshToken = req.cookies["refreshToken"];
+		if (!refreshToken) {
+			res.status(401);
+			throw new Error('Unauthorized');
+		}
+		const payload = jwt.verify(refreshToken,process.env.ACCESS_TOKEN_SECRET);
+		const { id } = payload;
+		
+		const user = await User.findOne({ _id: id });
+
+		const newAccessToken = jwt.sign(
+			{
+				id: user.id,
+				email: user.email,
+				role: user.role
+			},
+			process.env.ACCESS_TOKEN_SECRET
+		);
+
+		res.status(201).json({
+			accessToken: newAccessToken,
+		});
 	}
 )

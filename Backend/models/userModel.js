@@ -56,6 +56,11 @@ const userSchema = mongoose.Schema({
         required: false,
         default: ''
     },
+    facebookId: {
+        type: String,
+        required: false,
+        default: ''
+    },
     picture: {
         type: String,
         required: false,
@@ -103,6 +108,14 @@ const userSchema = mongoose.Schema({
     properties: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Property' 
+    }],
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Favorite'
+    }],
+    notifications: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Notification'
     }]
 }, {
     timestamps: true

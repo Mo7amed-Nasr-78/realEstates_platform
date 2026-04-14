@@ -1,17 +1,15 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useProps } from "../../components/PropsContext";
+import { useProps } from "../../components/PropsProvider";
 import Alert from "../../components/Alert";
 import axios from 'axios';
-import { useState } from "react";
 import Loader from "../../components/Loader";
 
 function Forgetpassword() {
 
     const navigate = useNavigate();
-    const { user, url } = useProps();
-    const [ isLoading, setIsLoading ] = useState(false);
-    
+    const { user, isLoading } = useProps();
+
     useEffect(() => {
 		if (user) {
 			navigate("/");
@@ -37,17 +35,14 @@ function Forgetpassword() {
             event.target.reset();
             return false;
         }
-    
-        setIsLoading(true);
+
         try {
-            const res = (await axios.post(`${url}/api/users/forgetpassword`, { email })).data;
-            navigate(res.redirectUrl, { state: { message: res.message } });
+            const { data: { redirectUrl, message } } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/users/forgetpassword`, { email });
+            navigate(redirectUrl, { state: { message: message } });
         } catch (err) {
             Alert('error', err.response?.data?.message);
-        } finally {
-            setIsLoading(false);
-        }
-    
+        } 
+
         event.target.lastChild.disabled = false;
         event.target.reset();
     }
@@ -55,8 +50,8 @@ function Forgetpassword() {
     if (isLoading) return <Loader />
 
     return (
-        <section className="w-full h-screen flex items-center justify-between bg-(--bg-color)">
-            <div className="w-full lg:w-[50%] h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
+        <section className="w-full h-screen flex items-center justify-center lg:justify-between bg-(--bg-color)">
+            <div className="w-full md:w-3/4 lg:w-[50%] h-full flex-col flex items-center justify-center px-5 md:px-10 lg:px-14 xl:px-20">
                 <h1 className="text-4xl sm:text-6xl md:text-5xl font-Playfair text-(--primary-text) capitalize font-semibold mb-3 text-center">forget password</h1>
                 <h3 className="w-full md:w-[90%] xl:w-[80%] font-Plus-Jakarta-Sans text-base md:text-lg font-light text-(--secondary-text) text-center mb-6 capitalize">No worries! Reset it quickly and securely to regain access to your account.</h3>
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-start mb-4">

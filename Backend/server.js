@@ -17,10 +17,9 @@ import chatRouter from "./routes/Chat.js";
 import bookingRouter from "./routes/Booking.js";
 import notificationRouter from "./routes/Notification.js";
 import { initSse } from "./config/initSSE.js";
-import validateToken from "./middlewares/validateTokenHandle.js";
 
 dotenv.config();
-const port = 3030;
+const port = process.env.PORT | 3030;
 const app = express();
 const server = http.createServer(app);
 
@@ -46,7 +45,16 @@ app.use(
 		credentials: true,
 	})
 );
-app.use(compression());
+
+// custom filter function
+function shouldCompress(req, res) {
+	if (req.path === "/events") {
+		return false;
+	}
+	return compression.filter(req, res);
+}
+
+app.use(compression({ filter: shouldCompress }));
 
 // Routes
 app.use("/api/users", userRouter);
@@ -58,7 +66,7 @@ app.use("/api/notification", notificationRouter);
 app.use("/auth", authRouter);
 
 // SSE Setup
-app.get('/events', validateToken, initSse);
+app.get("/events", initSse);
 
 // Error handling
 app.use(errorHandling);
