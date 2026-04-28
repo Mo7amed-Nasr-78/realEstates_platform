@@ -22,8 +22,9 @@ function Favorites() {
     } 
     = useProps();
 
-    const { data, isLoading } = useFavorites();
-    const listings = data?.data.favorites | [];
+    const [ page, setPage ] =  useState(1);
+    const { data, isLoading } = useFavorites({ page: page });   
+    const listings = data?.data.favorites || [];
 
     return (
         <main>

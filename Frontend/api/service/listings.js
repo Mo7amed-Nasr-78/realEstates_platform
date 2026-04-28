@@ -3,8 +3,20 @@ import { publicHttpClient } from "../client/publicHttpClient";
 
 class ListingsService {
 
-    getListings() {
-        return publicHttpClient.get(`api/property/getAll`);
+    getLoisting(id) {
+        return publicHttpClient.get(`api/property/${id}/details`)
+    }
+
+    getListings(query) {
+
+        const params = query && new URLSearchParams(
+            Object.entries(query).map(([key, value]) => [
+                key, 
+                String(value)
+            ])
+        )
+
+        return publicHttpClient.get(`api/property/getAll?${params}`);
     }
 
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useProps } from "../components/PropsProvider";
 import { useParams, Link, useNavigate } from "react-router-dom";
 
@@ -27,6 +27,8 @@ import Loader from "../components/Loader";
 import Carousel from "../components/Carousel";
 import Alert from '../components/Alert';
 import BookingModal from "../components/BookingModal";
+import { useListing } from "../../api/hooks/listings/useListing";
+import { useListings } from "../../api/hooks/listings/useListings";
 
 function PropertyDetails() {
 
@@ -42,8 +44,13 @@ function PropertyDetails() {
     } = useProps();
 
     // Component states
-    const [ property, setProperty ] = useState(null); 
-    const [ properties, setProperties ] = useState(null); 
+    // const [ property, setProperty ] = useState(null); 
+    const { data: propertyRes } = useListing(id);
+    const property = propertyRes?.data.property;
+    // const [ properties, setProperties ] = useState(null); 
+    const { data: propertiesRes } = useListings({ page: 1, perPage: 6 });
+    const properties = propertiesRes?.data.properties;
+
     const [ imgView, setImgView ] = useState(0); 
     const [ readMore, setReadMore ] = useState(false);
     const [ scrolled, setScrolled ] = useState(0);
@@ -54,43 +61,6 @@ function PropertyDetails() {
     const carouselCardRef = useRef(null);
     const carouselUpRef = useRef(null);
     const carouselDownRef = useRef(null);
-    
-    useEffect(() => {
-        const getProperty = async () => {
-            try {
-                const { data: { property } } = await api.get(
-                    `/api/property/${id}/details`
-                );
-
-                setProperty(property);
-            } catch (err) {
-                if (err.response) {
-                    Alert('error', err.response.data.message);
-                } else {
-                    Alert("error", err.message);
-                }
-            } 
-        }
-        getProperty()
-
-        const getProperties = async () => {
-            try {
-                const { data: { properties } } = await api.get(
-                    `/api/property/getAll`,
-                    {
-                        params: {
-                            page: 1,
-                            perPage: 6,
-                        }
-                    }
-                );
-                setProperties(properties);
-            } catch (err) {
-                console.log(err)
-            } 
-        }
-        getProperties()
-    }, [])
 
     const handleCarouselUp = () => {
         const carousel = carouselRef.current;
@@ -363,13 +333,13 @@ function PropertyDetails() {
 
                                     <div className={`h-full relative col-span-12 lg:col-span-4 row-span-1 flex flex-col gap-6`}>
                                         <div className="col-span-2 rounded-3xl bg-(--secondary-color) p-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="min-w-18 w-18 h-18 rounded-full overflow-hidden border border-(--primary-color)">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="min-w-14 w-14 h-14 rounded-full overflow-hidden border border-(--primary-color)">
                                                     <img src={property.user.picture} alt="picture" className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <h2 className="font-Plus-Jakarta-Sans font-semibold text-xl text-(--primary-text) capitalize">{ property.user.name }</h2>
-                                                    <h3 className="w-full font-Plus-Jakarta-Sans font-light text-lg text-(--secondary-text) capitalize line-clamp-1">{ property.user.jobTitle }</h3>
+                                                    <h2 className="font-Plus-Jakarta-Sans font-semibold text-lg xxl:text-xl text-(--primary-text) capitalize">{ property.user.name }</h2>
+                                                    <h3 className="w-full font-Plus-Jakarta-Sans font-light text-sm xxl:text-base text-(--secondary-text) capitalize line-clamp-1">{ property.user.jobTitle }</h3>
                                                 </div>
                                             </div>
                                             <div className="flex items-center justify-between mb-3">

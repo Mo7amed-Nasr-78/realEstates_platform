@@ -7,7 +7,7 @@ export function setAccessToken(token) {
     accessToken = token;
 
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
         accessTokenExp = payload.exp * 1000
     } catch (e) {
         console.log(e);

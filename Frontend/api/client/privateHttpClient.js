@@ -1,31 +1,31 @@
 import axios from "axios";
 
 class PrivateHttpClient {
-    instance;
-    accessToken;
-    accessTokenExp;
-    refreshPromise;
-    logoutCallback;
+	instance;
+	accessToken;
+	accessTokenExp;
+	refreshPromise;
+	logoutCallback;
 
-    constructor() {
-        this.instance = axios.create(({
-            baseURL: import.meta.env.VITE_BACKEND_URL,
-            withCredentials: true
-        }))
+	constructor() {
+		this.instance = axios.create({
+			baseURL: import.meta.env.VITE_BACKEND_URL,
+			withCredentials: true,
+		});
 
-        this.setupInterceptors();
-    }
+		this.setupInterceptors();
+	}
 
-    // Authorization setup
-    isExpired() {
-        return Date.now() >= this.accessTokenExp - 10000
-    }
+	// Authorization setup
+	isExpired() {
+		return Date.now() >= this.accessTokenExp * 1000 - 10000;
+	}
 
-    setAccessToken(token) {
-        this.accessToken = token;
+	setAccessToken(token) {
+		this.accessToken = token;
 
-        try {
-			const { exp }= JSON.parse(
+		try {
+			const { exp } = JSON.parse(
 				atob(this.accessToken.split(".")[1]),
 			);
 			this.accessTokenExp = exp;
@@ -33,110 +33,116 @@ class PrivateHttpClient {
 			console.log(err);
 			this.accessTokenExp = 0;
 		}
-    }
+	}
 
-    async refreshAccessToken() {
-        if (this.refreshPromise) return this.refreshPromise;
+	getAccessToken() {
+		return this.accessToken;
+	}
 
-        let attempts = 3;
-        const maxAttempts = 3;
-        const baseDelay = 1000;
+	async refreshAccessToken() {
+		if (this.refreshPromise) return this.refreshPromise;
 
-        while(attempts >= maxAttempts) {
-            try {
-                this.refreshPromise = axios.post(
-                    `${import.meta.env.VITE_BACKEND_URL}/auth/refresh`,
-                    {},
-                    {
-                        withCredentials: true
-                    }
-                ).then((res) => {
-                    this.setAccessToken(res.data);
-                    return res.data;
-                });
-                return await this.refreshPromise;
-            } catch (err) {
-                attempts++;
-                if (attempts >= maxAttempts) {
-                    this.logoutCallback?.();
-                    throw err;
-                }
-                const delay = baseDelay * Math.pow(2, attempts - 1);
-                await new Promise((resolve) => 
-                    setTimeout(() => {
-                        resolve
-                    }, delay)
-                )
-            } finally {
-                this.refreshPromise = null;
-            }
-        }
-    }
+		let attempts = 0;
+		const maxAttempts = 3;
+		const baseDelay = 1000;
 
-    setupInterceptors() {
-        // Request Interceptor
-        this.instance.interceptors.request.use(
-            async (config) => {
-                if (!this.accessToken && this.isExpired) {
-                    await this.refreshAccessToken();
-                }
+		while (attempts < maxAttempts) {
+			try {
+				this.refreshPromise = axios
+					.post(
+						`${import.meta.env.VITE_BACKEND_URL}/auth/refresh`,
+						{},
+						{
+							withCredentials: true,
+						},
+					)
+					.then((res) => {
+						this.setAccessToken(res.data);
+						return res.data;
+					});
+				return await this.refreshPromise;
+			} catch (err) {
+				attempts++;
+				if (attempts >= maxAttempts) {
+					this.logoutCallback?.();
+					throw err;
+				}
+				const delay = baseDelay * Math.pow(2, attempts - 1);
+				await new Promise((resolve) =>
+					setTimeout(() => {
+						resolve;
+					}, delay),
+				);
+			} finally {
+				this.refreshPromise = null;
+			}
+		}
+	}
 
-                if (this.accessToken) {
-                    config.headers.Authorization = `Bearer ${this.accessToken}`;
-                }
+	setupInterceptors() {
+		// Request Interceptor
+		this.instance.interceptors.request.use(
+			async (config) => {
+				if (!this.accessToken || this.isExpired()) {
+					await this.refreshAccessToken();
+				}
 
-                return config;
-            },
-            (err) => err,
-        );
+				if (this.accessToken) {
+					config.headers.Authorization = `Bearer ${this.accessToken}`;
+				}
 
-        // Response interceptor
-        this.instance.interceptors.response.use(
-            (res) => res,
-            async (err) => {
-                const original = err.config;
+				return config;
+			},
+			(err) => err,
+		);
 
-                if (err.response.status === 401 && !original._retry) {
-                    original._retry = true;
+		// Response interceptor
+		this.instance.interceptors.response.use(
+			(res) => res,
+			async (err) => {
+				const original = err.config;
 
-                    try {
-                        await this.refreshAccessToken();
-                        original.headers.Authorization = `Bearer ${this.accessToken}`;
-                        return this.instance(original);
-                    } catch(err) {
-                        console.log(
+				if (err.response.status === 401 && !original._retry) {
+					original._retry = true;
+
+					try {
+						await this.refreshAccessToken();
+						original.headers.Authorization = `Bearer ${this.accessToken}`;
+						return this.instance(original);
+					} catch (err) {
+						console.log(
 							"Failed to refresh, Logging out...",
 						);
 						this.logoutCallback?.();
 						return Promise.reject(err);
-                    }
-                }
+					}
+				}
 
-                return err;
-            }
-        )
-    }
+				return err;
+			},
+		);
+	}
 
-    setLoagoutCallback(callback) {
-        this.logoutCallback = callback;
-    }
+	setLogoutCallback(callback) {
+		this.logoutCallback = callback;
+	}
 
-    // Request actions
-    get(url) {
-        return this.instance.get(url);
-    }
+	// Request actions
+	get(url) {
+		return this.instance.get(url);
+	}
 
-    post(url, data) {
-        return this.instance.post(url, data);
-    }
+	post(url, data) {
+		return this.instance.post(url, data);
+	}
 
-    put(url, data) {
-        return this.instance.put(url, data);
-    }
+	put(url, data) {
+		return this.instance.put(url, data);
+	}
 
-    delete(url) {
-        return this.instance.delete(url);
-    }
+	delete(url) {
+		return this.instance.delete(url);
+	}
 }
 
-export const privateHttpClient = new PrivateHttpClient()
+export const privateHttpClient = new PrivateHttpClient();

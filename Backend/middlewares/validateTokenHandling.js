@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 const validateToken = (req, res, next) => {
     const [type, token] = req.headers.authorization?.split(' ') || [];
-
+    
     if (!type || !token) {
         res.status(401);
         throw new Error("Unauthorized");
